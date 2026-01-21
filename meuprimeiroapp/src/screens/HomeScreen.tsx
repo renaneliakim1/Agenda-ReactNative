@@ -21,10 +21,18 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo ao Meu Primeiro App</Text>
+
+      <Text style = { styles.text }> Escolha uma opção abaixo: </Text>
         <Button
             title="Ir para Detalhes"    
-
             onPress={() => navigation.navigate('Details')}
+        />
+
+        <View style = {{ marginTop: 10 }} />
+
+        <Button 
+          title="Ir para Cadastro"
+          onPress={() => navigation.navigate('Register')} 
         />
     </View>
   );
