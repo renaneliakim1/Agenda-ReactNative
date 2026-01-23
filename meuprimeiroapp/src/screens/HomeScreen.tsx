@@ -34,6 +34,14 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           title="Ir para Cadastro"
           onPress={() => navigation.navigate('Register')} 
         />
+
+        <View style = {{ marginTop: 10 }} />
+
+        <Button 
+          title="Ver Usuários Cadastrados"
+          color="green"
+          onPress={() => navigation.navigate('UserList')} 
+        />
     </View>
   );
 }
