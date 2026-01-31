@@ -1,7 +1,21 @@
-import { View, Text, TextInput, Button, StyleSheet, Alert, Platform } from 'react-native';
-import { useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { STORAGE_KEYS } from '../../constants/storage-keys';
+import React, { useState } from 'react';
+import {
+	View,
+	Text,
+	TextInput,
+	StyleSheet,
+	TouchableOpacity,
+	Alert,
+	ActivityIndicator,
+	SafeAreaView,
+	ScrollView,
+	KeyboardAvoidingView,
+	Platform,
+} from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../config/firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -12,225 +26,365 @@ type Props = {
 };
 
 export default function RegisterScreen({ navigation }: Props) {
-    const [nome, setNome] = useState('');
-    const [email, setEmail] = useState('');
-    const [idade, setIdade] = useState('');
-    const [phone, setPhone] = useState('');
+	const [nome, setNome] = useState('');
+	const [email, setEmail] = useState('');
+	const [senha, setSenha] = useState('');
+	const [confirmarSenha, setConfirmarSenha] = useState('');
+	const [telefone, setTelefone] = useState('');
+	const [loading, setLoading] = useState(false);
 
-    // Validação de e-mail com REGEX
-    function isValidEmail(email: string) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
+	// Validação de e-mail
+	function isValidEmail(email: string) {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email);
+	}
 
-    // Validação de telefone (10 ou 11 dígitos)
-    function isValidPhone(phone: string) {
-        const phoneNumbers = phone.replace(/\D/g, '');
-        const phoneRegex = /^\d{10,11}$/;
-        return phoneRegex.test(phoneNumbers);
-    }
+	// Validação de telefone (10 ou 11 dígitos)
+	function isValidPhone(phone: string) {
+		const phoneNumbers = phone.replace(/\D/g, '');
+		const phoneRegex = /^\d{10,11}$/;
+		return phoneRegex.test(phoneNumbers);
+	}
 
-    //  CREATE - salvar no AsyncStorage
-    async function saveUser() {
-        try {
-            console.log('=== INICIANDO SALVAMENTO ===');
-            const newUser = {
-                id: Date.now().toString(),
-                nome,
-                email,
-                idade,
-                phone,
-            };
-            console.log('Novo usuário:', JSON.stringify(newUser, null, 2));
+	const handleRegister = async () => {
+		console.log('🔵 Botão Criar Conta clicado!');
+		console.log('Dados:', { nome, email, telefone, senha: senha ? '***' : '', confirmarSenha: confirmarSenha ? '***' : '' });
+		
+		// Validações
+		if (!nome || !email || !senha || !confirmarSenha || !telefone) {
+			console.log('❌ Campos vazios detectados');
+			Alert.alert('Erro', 'Por favor, preencha todos os campos');
+			return;
+		}
 
-            console.log('Buscando usuários existentes com chave:', STORAGE_KEYS.USERS);
-            const storedUsers = await AsyncStorage.getItem(STORAGE_KEYS.USERS);
-            console.log('Dados brutos do storage:', storedUsers);
-            
-            let users = storedUsers ? JSON.parse(storedUsers) : [];
-            console.log('Total de usuários antes:', users.length);
+		if (!isValidEmail(email)) {
+			console.log('❌ Email inválido:', email);
+			Alert.alert('Erro', 'E-mail inválido');
+			return;
+		}
 
-            users.push(newUser);
-            console.log('Total de usuários depois:', users.length);
-            
-            const dataToSave = JSON.stringify(users);
-            console.log('Salvando no AsyncStorage...');
-            await AsyncStorage.setItem(STORAGE_KEYS.USERS, dataToSave);
-            console.log('✅ SALVO COM SUCESSO no AsyncStorage!');
-            console.log('Chave usada:', STORAGE_KEYS.USERS);
-            console.log('Dados salvos:', dataToSave);
+		if (senha.length < 6) {
+			console.log('❌ Senha muito curta:', senha.length);
+			Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+			return;
+		}
 
-            // Na web, também mostra no console de forma visual
-            if (Platform.OS === 'web') {
-                console.log('%c✅ USUÁRIO SALVO COM SUCESSO!', 'color: green; font-size: 16px; font-weight: bold;');
-                console.table([newUser]);
-            }
+		if (senha !== confirmarSenha) {
+			console.log('❌ Senhas não coincidem');
+			Alert.alert('Erro', 'As senhas não coincidem');
+			return;
+		}
 
-            Alert.alert(
-                'Sucesso',
-                `Usuário salvo com sucesso!\n\nTotal de usuários: ${users.length}\n\nChave: ${STORAGE_KEYS.USERS}`
-            );
+		if (!isValidPhone(telefone)) {
+			console.log('❌ Telefone inválido:', telefone);
+			Alert.alert('Erro', 'Telefone deve conter 10 ou 11 dígitos');
+			return;
+		}
 
-            // Limpa formulário
-            setNome('');
-            setEmail('');
-            setIdade('');
-            setPhone('');
+		console.log('✅ Todas as validações passaram, iniciando cadastro...');
+		setLoading(true);
 
-        } catch (error) {
-            console.error('❌ ERRO AO SALVAR:', error);
-            Alert.alert('Erro', `Não foi possível salvar o usuário.\n\nDetalhes: ${error}`);
-        }
-    }
+		try {
+			console.log('1️⃣ Criando usuário no Firebase Auth...');
+			// 1. Criar usuário no Firebase Authentication
+			const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+			const user = userCredential.user;
+			console.log('✅ Usuário criado com sucesso! UID:', user.uid);
 
-    // Fluxo principal
-    function handleSave() {
+			console.log('2️⃣ Atualizando perfil...');
+			// 2. Atualizar o perfil com o nome
+			await updateProfile(user, {
+				displayName: nome,
+			});
+			console.log('✅ Perfil atualizado!');
 
-        if (!nome || !email || !idade || !phone) {
-            Alert.alert('Erro', 'Por favor, preencha todos os campos.');
-            return;
-        }
+			console.log('3️⃣ Salvando dados no Firestore...');
+			// 3. Salvar dados adicionais no Firestore
+			await setDoc(doc(db, 'usuarios', user.uid), {
+				nome,
+				email,
+				telefone,
+				criadoEm: serverTimestamp(),
+				uid: user.uid,
+			});
+			console.log('✅ Dados salvos no Firestore!');
 
-        if (!isValidEmail(email)) {
-            Alert.alert('Erro', 'E-mail inválido.');
-            return;
-        }
+			Alert.alert(
+				'Sucesso!',
+				'Cadastro realizado com sucesso!',
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							console.log('Navegando para Login...');
+							navigation.navigate('Login');
+						},
+					},
+				]
+			);
 
-        if (!isValidPhone(phone)) {
-            Alert.alert('Erro', 'Telefone deve conter 10 ou 11 dígitos.');
-            return;
-        }
+		} catch (error: any) {
+			console.error('❌ ERRO NO CADASTRO:', error);
+			console.error('Código do erro:', error?.code);
+			console.error('Mensagem:', error?.message);
+			
+			let message = 'Erro ao realizar cadastro';
+			
+			if (error && error.code) {
+				switch (error.code) {
+					case 'permission-denied':
+						message = 'Erro de permissão no Firestore.\n\n' +
+							'Para resolver:\n' +
+							'1. Acesse console.firebase.google.com\n' +
+							'2. Vá em Firestore Database > Regras\n' +
+							'3. Substitua as regras por:\n\n' +
+							'allow read, write: if request.auth != null;\n\n' +
+							'4. Publique as alterações';
+						break;
+					case 'auth/configuration-not-found':
+						message = 'Firebase Authentication não está configurado.\n\n' +
+							'Para resolver:\n' +
+							'1. Acesse console.firebase.google.com\n' +
+							'2. Vá em Authentication > Sign-in method\n' +
+							'3. Habilite "Email/Password"\n' +
+							'4. Salve as alterações';
+						break;
+					case 'auth/email-already-in-use':
+						// Tratamento especial para email já cadastrado
+						Alert.alert(
+							'Email Já Cadastrado',
+							`O email ${email} já possui uma conta cadastrada.\n\nDeseja fazer login?`,
+							[
+								{
+									text: 'Cancelar',
+									style: 'cancel',
+								},
+								{
+									text: 'Fazer Login',
+									onPress: () => navigation.navigate('Login'),
+								},
+							]
+						);
+						setLoading(false);
+						return; // Retorna aqui para não mostrar o alert padrão
+					case 'auth/invalid-email':
+						message = 'E-mail inválido';
+						break;
+					case 'auth/weak-password':
+						message = 'Senha muito fraca';
+						break;
+					case 'auth/network-request-failed':
+						message = 'Erro de conexão. Verifique sua internet.';
+						break;
+					default:
+						message = error.message || message;
+				}
+			} else if (error && error.message) {
+				message = error.message;
+			}
 
-        saveUser();
-    }
+			Alert.alert('Erro no Cadastro', message);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-    // Visualizar dados salvos
-    async function viewSavedData() {
-        try {
-            console.log('=== LENDO DADOS SALVOS ===');
-            console.log('Chave de busca:', STORAGE_KEYS.USERS);
-            
-            const storedUsers = await AsyncStorage.getItem(STORAGE_KEYS.USERS);
-            console.log('Dados brutos:', storedUsers);
-            
-            if (!storedUsers) {
-                console.log('⚠️ Nenhum dado encontrado');
-                Alert.alert('Aviso', 'Nenhum usuário foi salvo ainda.');
-                return;
-            }
+	return (
+		<SafeAreaView style={styles.safeArea}>
+			<KeyboardAvoidingView 
+				style={styles.container}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
+			>
+				<ScrollView 
+					showsVerticalScrollIndicator={false}
+					contentContainerStyle={styles.scrollContent}
+				>
+					<View style={styles.headerContainer}>
+						<MaterialCommunityIcons name="account-plus" size={56} color="#6366F1" />
+						<Text style={styles.title}>Cadastre-se</Text>
+						<Text style={styles.subtitle}>Crie sua conta gratuitamente</Text>
+					</View>
 
-            const users = JSON.parse(storedUsers);
-            console.log('✅ Usuários encontrados:', users.length);
-            
-            if (Platform.OS === 'web') {
-                console.log('%c📋 LISTA DE USUÁRIOS', 'color: blue; font-size: 16px; font-weight: bold;');
-                console.table(users);
-            }
-            
-            const userList = users.map((u: any, index: number) => 
-                `${index + 1}. ${u.nome} - ${u.email} - Tel: ${u.phone}`
-            ).join('\n');
+					<View style={styles.formContainer}>
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Nome Completo</Text>
+							<TextInput
+								style={styles.input}
+								placeholder="Seu nome completo"
+								placeholderTextColor="#9CA3AF"
+								value={nome}
+								onChangeText={setNome}
+							/>
+						</View>
 
-            const storageInfo = Platform.OS === 'web' 
-                ? '\n\nLocal: AsyncStorage (Armazenamento Local do Navegador)'
-                : `\n\nLocal: AsyncStorage (${Platform.OS})`;
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Email</Text>
+							<TextInput
+								style={styles.input}
+								placeholder="seu@email.com"
+								placeholderTextColor="#9CA3AF"
+								keyboardType="email-address"
+								autoCapitalize="none"
+								value={email}
+								onChangeText={setEmail}
+							/>
+						</View>
 
-            Alert.alert(
-                'Usuários Salvos',
-                `Total: ${users.length}\n\n${userList}${storageInfo}\n\nChave: ${STORAGE_KEYS.USERS}`,
-                [{ text: 'OK' }]
-            );
-        } catch (error) {
-            console.error('Erro ao ler dados:', error);
-            Alert.alert('Erro', `Não foi possível ler os dados.\n\nDetalhes: ${error}`);
-        }
-    }
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Telefone</Text>
+							<TextInput
+								style={styles.input}
+								placeholder="(00) 00000-0000"
+								placeholderTextColor="#9CA3AF"
+								keyboardType="phone-pad"
+								value={telefone}
+								onChangeText={setTelefone}
+							/>
+						</View>
 
-    return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Cadastro</Text>
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Senha</Text>
+							<TextInput
+								style={styles.input}
+								placeholder="Mínimo 6 caracteres"
+								placeholderTextColor="#9CA3AF"
+								secureTextEntry
+								value={senha}
+								onChangeText={setSenha}
+							/>
+						</View>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Nome"
-                value={nome}
-                onChangeText={setNome}
-            />
+						<View style={styles.inputGroup}>
+							<Text style={styles.label}>Confirmar Senha</Text>
+							<TextInput
+								style={styles.input}
+								placeholder="Digite a senha novamente"
+								placeholderTextColor="#9CA3AF"
+								secureTextEntry
+								value={confirmarSenha}
+								onChangeText={setConfirmarSenha}
+							/>
+						</View>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-            />
+						<TouchableOpacity
+							style={[styles.button, loading && styles.buttonDisabled]}
+							onPress={handleRegister}
+							disabled={loading}
+						>
+							{loading ? (
+								<ActivityIndicator color="#fff" />
+							) : (
+								<Text style={styles.buttonText}>Criar Conta</Text>
+							)}
+						</TouchableOpacity>
+					</View>
 
-            <TextInput
-                style={styles.input}
-                placeholder="Idade"
-                value={idade}
-                onChangeText={setIdade}
-                keyboardType="numeric"
-            />
-
-            <TextInput
-                style={styles.input}
-                placeholder="Telefone"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-            />
-
-            <View style={styles.buttonContainer}>
-                <Button title="Salvar" onPress={handleSave} />
-            </View>
-
-            <View style={styles.buttonContainer}>
-                <Button
-                    title="Cancelar"
-                    color="red"
-                    onPress={() => {
-                        setNome('');
-                        setEmail('');
-                        setIdade('');
-                        setPhone('');
-                    }}
-                />
-            </View>
-
-            <View style={styles.buttonContainer}>
-                <Button
-                    title="Ver Lista de Usuários"
-                    color="green"
-                    onPress={() => navigation.navigate('UserList')}
-                />
-            </View>
-        </View>
-    );
+					<View style={styles.footer}>
+						<Text style={styles.footerText}>Já tem uma conta?</Text>
+						<TouchableOpacity onPress={() => navigation.navigate('Login')}>
+							<Text style={styles.loginLink}>Faça login aqui</Text>
+						</TouchableOpacity>
+					</View>
+				</ScrollView>
+			</KeyboardAvoidingView>
+		</SafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        padding: 10,
-        marginBottom: 15,
-        fontSize: 16,
-    },
-    buttonContainer: {
-        marginBottom: 10,
-    },
+	safeArea: {
+		flex: 1,
+		backgroundColor: '#F9FAFB',
+	},
+	container: {
+		flex: 1,
+		backgroundColor: '#F9FAFB',
+	},
+	scrollContent: {
+		flexGrow: 1,
+		justifyContent: 'center',
+		paddingHorizontal: 20,
+		paddingVertical: 40,
+	},
+	headerContainer: {
+		alignItems: 'center',
+		marginBottom: 32,
+	},
+	title: {
+		fontSize: 32,
+		fontWeight: '700',
+		color: '#1F2937',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	subtitle: {
+		fontSize: 16,
+		color: '#6B7280',
+		textAlign: 'center',
+		fontWeight: '400',
+	},
+	formContainer: {
+		marginBottom: 24,
+		gap: 12,
+	},
+	inputGroup: {
+		marginBottom: 4,
+	},
+	label: {
+		fontSize: 14,
+		fontWeight: '600',
+		marginBottom: 8,
+		color: '#1F2937',
+		letterSpacing: 0.3,
+	},
+	input: {
+		borderWidth: 1.5,
+		borderColor: '#E5E7EB',
+		borderRadius: 12,
+		paddingHorizontal: 16,
+		paddingVertical: 14,
+		fontSize: 16,
+		backgroundColor: '#FFFFFF',
+		color: '#1F2937',
+		fontWeight: '500',
+	},
+	button: {
+		backgroundColor: '#6366F1',
+		borderRadius: 12,
+		paddingVertical: 16,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		marginTop: 12,
+		shadowColor: '#6366F1',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 8,
+		elevation: 4,
+	},
+	buttonDisabled: {
+		backgroundColor: '#C4B5FD',
+		shadowOpacity: 0.1,
+	},
+	buttonText: {
+		color: '#FFFFFF',
+		fontSize: 16,
+		fontWeight: '700',
+		letterSpacing: 0.5,
+	},
+	footer: {
+		alignItems: 'center',
+		gap: 4,
+	},
+	footerText: {
+		fontSize: 14,
+		color: '#6B7280',
+		fontWeight: '400',
+	},
+	loginLink: {
+		fontSize: 14,
+		color: '#6366F1',
+		fontWeight: '700',
+		letterSpacing: 0.3,
+	},
 });
