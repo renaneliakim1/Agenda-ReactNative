@@ -31,7 +31,9 @@ export default function RegisterScreen({ navigation }: Props) {
 	const [senha, setSenha] = useState('');
 	const [confirmarSenha, setConfirmarSenha] = useState('');
 	const [telefone, setTelefone] = useState('');
-	const [loading, setLoading] = useState(false);
+		const [loading, setLoading] = useState(false);
+		const [showSenha, setShowSenha] = useState(true);
+		const [showConfirmarSenha, setShowConfirmarSenha] = useState(true);
 
 	// Validação de e-mail
 	function isValidEmail(email: string) {
@@ -245,26 +247,50 @@ export default function RegisterScreen({ navigation }: Props) {
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Senha</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="Mínimo 6 caracteres"
-								placeholderTextColor="#9CA3AF"
-								secureTextEntry
-								value={senha}
-								onChangeText={setSenha}
-							/>
+							<View style={{ position: 'relative' }}>
+								<TextInput
+									style={styles.input}
+									placeholder="Mínimo 6 caracteres"
+									placeholderTextColor="#9CA3AF"
+									secureTextEntry={showSenha}
+									value={senha}
+									onChangeText={setSenha}
+								/>
+								<TouchableOpacity
+									style={{ position: 'absolute', right: 16, top: 18 }}
+									onPress={() => setShowSenha((prev) => !prev)}
+								>
+									<MaterialCommunityIcons
+										name={showSenha ? 'eye-off' : 'eye'}
+										size={22}
+										color="#9CA3AF"
+									/>
+								</TouchableOpacity>
+							</View>
 						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Confirmar Senha</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="Digite a senha novamente"
-								placeholderTextColor="#9CA3AF"
-								secureTextEntry
-								value={confirmarSenha}
-								onChangeText={setConfirmarSenha}
-							/>
+							<View style={{ position: 'relative' }}>
+								<TextInput
+									style={styles.input}
+									placeholder="Digite a senha novamente"
+									placeholderTextColor="#9CA3AF"
+									secureTextEntry={showConfirmarSenha}
+									value={confirmarSenha}
+									onChangeText={setConfirmarSenha}
+								/>
+								<TouchableOpacity
+									style={{ position: 'absolute', right: 16, top: 18 }}
+									onPress={() => setShowConfirmarSenha((prev) => !prev)}
+								>
+									<MaterialCommunityIcons
+										name={showConfirmarSenha ? 'eye-off' : 'eye'}
+										size={22}
+										color="#9CA3AF"
+									/>
+								</TouchableOpacity>
+							</View>
 						</View>
 
 						<TouchableOpacity
@@ -295,11 +321,11 @@ export default function RegisterScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
+		backgroundColor: '#F4F4F5', // cinza bem claro
 	},
 	container: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
+		backgroundColor: '#FFF', // branco
 	},
 	scrollContent: {
 		flexGrow: 1,
@@ -314,7 +340,7 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 32,
 		fontWeight: '700',
-		color: '#1F2937',
+		color: '#22223B',
 		marginBottom: 8,
 		textAlign: 'center',
 	},
@@ -335,42 +361,56 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: '600',
 		marginBottom: 8,
-		color: '#1F2937',
+		color: '#22223B',
 		letterSpacing: 0.3,
 	},
 	input: {
-		borderWidth: 1.5,
-		borderColor: '#E5E7EB',
-		borderRadius: 12,
-		paddingHorizontal: 16,
-		paddingVertical: 14,
+		borderWidth: 1.2,
+		borderColor: '#D1D5DB',
+		borderRadius: 4, // quadrado
+		paddingHorizontal: 14,
+		paddingVertical: 12,
 		fontSize: 16,
-		backgroundColor: '#FFFFFF',
-		color: '#1F2937',
+		backgroundColor: '#F8FAFC', // cinza muito claro
+		color: '#22223B',
 		fontWeight: '500',
 	},
 	button: {
-		backgroundColor: '#6366F1',
-		borderRadius: 12,
-		paddingVertical: 16,
+		backgroundColor: '#2563EB', // azul
+		borderRadius: 4, // quadrado
+		paddingVertical: 14,
 		paddingHorizontal: 20,
 		alignItems: 'center',
 		marginTop: 12,
-		shadowColor: '#6366F1',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		elevation: 4,
+		elevation: 2,
 	},
 	buttonDisabled: {
-		backgroundColor: '#C4B5FD',
-		shadowOpacity: 0.1,
+		backgroundColor: '#A5B4FC',
+		opacity: 0.7,
 	},
 	buttonText: {
-		color: '#FFFFFF',
+		color: '#FFF',
 		fontSize: 16,
 		fontWeight: '700',
 		letterSpacing: 0.5,
+	},
+	buttonRed: {
+		backgroundColor: '#DC2626', // vermelho
+		borderRadius: 4,
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		marginTop: 12,
+		elevation: 2,
+	},
+	buttonGreen: {
+		backgroundColor: '#16A34A', // verde
+		borderRadius: 4,
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		marginTop: 12,
+		elevation: 2,
 	},
 	footer: {
 		alignItems: 'center',
@@ -383,7 +423,7 @@ const styles = StyleSheet.create({
 	},
 	loginLink: {
 		fontSize: 14,
-		color: '#6366F1',
+		color: '#2563EB', // azul
 		fontWeight: '700',
 		letterSpacing: 0.3,
 	},

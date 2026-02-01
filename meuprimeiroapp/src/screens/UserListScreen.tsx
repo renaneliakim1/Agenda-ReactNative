@@ -124,7 +124,7 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
         console.log('🔄 Fazendo logout...');
         await signOut(auth);
         console.log('✅ Logout realizado');
-        navigation.replace('Login');
+        // A navegação será tratada automaticamente pelo onAuthStateChanged no AppNavigator
       } catch (error) {
         console.error('❌ Erro ao fazer logout:', error);
         window.alert('Erro ao sair. Tente novamente.');
@@ -143,7 +143,7 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
                 console.log('🔄 Fazendo logout...');
                 await signOut(auth);
                 console.log('✅ Logout realizado');
-                navigation.replace('Login');
+                // A navegação será tratada automaticamente pelo onAuthStateChanged no AppNavigator
               } catch (error) {
                 console.error('❌ Erro ao fazer logout:', error);
                 Alert.alert('Erro', 'Não foi possível sair');

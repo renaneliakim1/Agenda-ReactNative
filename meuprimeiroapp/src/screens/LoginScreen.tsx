@@ -95,22 +95,10 @@ export default function LoginScreen({ navigation }: any) {
 			const user = userCredential.user;
 			
 			console.log('✅ Login bem-sucedido:', user.email);
+			console.log('🔄 Aguardando redirecionamento automático...');
 			
-			if (Platform.OS === 'web') {
-				window.alert(`Login Realizado\n\nBem-vindo(a), ${user.email}!`);
-				navigation.navigate('UserList');
-			} else {
-				Alert.alert(
-					'Login Realizado',
-					`Bem-vindo(a), ${user.email}!`,
-					[
-						{
-							text: 'OK',
-							onPress: () => navigation.navigate('UserList'),
-						},
-					]
-				);
-			}
+			// A navegação será tratada automaticamente pelo onAuthStateChanged no AppNavigator
+			// Não é necessário navegar manualmente
 		} catch (error: any) {
 			console.error('❌ Erro no login:', error);
 			console.error('Código do erro:', error?.code);
@@ -182,7 +170,18 @@ export default function LoginScreen({ navigation }: any) {
 						<Text style={styles.title}>Login</Text>
 						<Text style={styles.subtitle}>Acesse sua conta</Text>
 					</View>
-
+				<View style={styles.infoContainer}>
+					<View style={styles.infoCard}>
+						<MaterialCommunityIcons name="contacts" size={32} color="#6366F1" style={styles.infoIcon} />
+						<Text style={styles.infoTitle}>Sistema de Gerenciamento de Contatos</Text>
+						<Text style={styles.infoDescription}>
+							Organize e gerencie seus contatos pessoais de forma simples e segura. 
+							Adicione, edite e pesquise contatos com informações como nome, email, 
+							telefone e idade. Todos os seus dados são armazenados de forma 
+							segura na nuvem e sincronizados em tempo real.
+						</Text>
+					</View>
+				</View>
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
 							<Text style={styles.label}>Email</Text>
@@ -249,11 +248,11 @@ export default function LoginScreen({ navigation }: any) {
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
+		backgroundColor: '#F4F4F5', // cinza bem claro
 	},
 	container: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
+		backgroundColor: '#FFF', // branco
 	},
 	scrollContent: {
 		flexGrow: 1,
@@ -263,12 +262,39 @@ const styles = StyleSheet.create({
 	},
 	headerContainer: {
 		alignItems: 'center',
-		marginBottom: 40,
+		marginBottom: 30,
+	},
+	infoContainer: {
+		marginBottom: 30,
+	},
+	infoCard: {
+		backgroundColor: '#F0F4FF',
+		borderRadius: 12,
+		padding: 20,
+		borderWidth: 1,
+		borderColor: '#E0E7FF',
+		alignItems: 'center',
+	},
+	infoIcon: {
+		marginBottom: 12,
+	},
+	infoTitle: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#22223B',
+		marginBottom: 10,
+		textAlign: 'center',
+	},
+	infoDescription: {
+		fontSize: 14,
+		color: '#4B5563',
+		textAlign: 'center',
+		lineHeight: 20,
 	},
 	title: {
 		fontSize: 32,
 		fontWeight: '700',
-		color: '#1F2937',
+		color: '#22223B',
 		marginBottom: 8,
 		textAlign: 'center',
 	},
@@ -289,64 +315,78 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		fontWeight: '600',
 		marginBottom: 8,
-		color: '#1F2937',
+		color: '#22223B',
 		letterSpacing: 0.3,
 	},
 	input: {
-		borderWidth: 1.5,
-		borderColor: '#E5E7EB',
-		borderRadius: 12,
-		paddingHorizontal: 16,
-		paddingVertical: 14,
+		borderWidth: 1.2,
+		borderColor: '#D1D5DB',
+		borderRadius: 4, // quadrado
+		paddingHorizontal: 14,
+		paddingVertical: 12,
 		fontSize: 16,
-		backgroundColor: '#FFFFFF',
-		color: '#1F2937',
+		backgroundColor: '#F8FAFC', // cinza muito claro
+		color: '#22223B',
 		fontWeight: '500',
 	},
 	passwordContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		borderWidth: 1.5,
-		borderColor: '#E5E7EB',
-		borderRadius: 12,
-		backgroundColor: '#FFFFFF',
+		borderWidth: 1.2,
+		borderColor: '#D1D5DB',
+		borderRadius: 4,
+		backgroundColor: '#F8FAFC',
 	},
 	passwordInput: {
 		flex: 1,
-		paddingHorizontal: 16,
-		paddingVertical: 14,
+		paddingHorizontal: 14,
+		paddingVertical: 12,
 		fontSize: 16,
-		color: '#1F2937',
+		color: '#22223B',
 		fontWeight: '500',
 	},
 	eyeButton: {
 		paddingHorizontal: 12,
-		paddingVertical: 14,
+		paddingVertical: 12,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
 	button: {
-		backgroundColor: '#6366F1',
-		borderRadius: 12,
-		paddingVertical: 16,
+		backgroundColor: '#2563EB', // azul
+		borderRadius: 4, // quadrado
+		paddingVertical: 14,
 		paddingHorizontal: 20,
 		alignItems: 'center',
 		marginTop: 12,
-		shadowColor: '#6366F1',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		elevation: 4,
+		elevation: 2,
 	},
 	buttonDisabled: {
-		backgroundColor: '#C4B5FD',
-		shadowOpacity: 0.1,
+		backgroundColor: '#A5B4FC',
+		opacity: 0.7,
 	},
 	buttonText: {
-		color: '#FFFFFF',
+		color: '#FFF',
 		fontSize: 16,
 		fontWeight: '700',
 		letterSpacing: 0.5,
+	},
+	buttonRed: {
+		backgroundColor: '#DC2626', // vermelho
+		borderRadius: 4,
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		marginTop: 12,
+		elevation: 2,
+	},
+	buttonGreen: {
+		backgroundColor: '#16A34A', // verde
+		borderRadius: 4,
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		marginTop: 12,
+		elevation: 2,
 	},
 	footer: {
 		alignItems: 'center',
@@ -359,7 +399,7 @@ const styles = StyleSheet.create({
 	},
 	registerLink: {
 		fontSize: 14,
-		color: '#6366F1',
+		color: '#2563EB', // azul
 		fontWeight: '700',
 		letterSpacing: 0.3,
 	},
