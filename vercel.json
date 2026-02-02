@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd meuprimeiroapp && npx expo export:web",
+  "outputDirectory": "meuprimeiroapp/dist",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
