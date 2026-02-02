@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.renaneliakim1.meuprimeiroapp"
     },
     "web": {
       "output": "static",
@@ -38,6 +39,11 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6843f71b-55df-41b6-b9f7-37c363ea9481"
+      }
+    }
   }
 }

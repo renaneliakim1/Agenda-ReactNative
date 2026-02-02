@@ -1,50 +1,266 @@
-# Welcome to your Expo app 👋
+# Sistema de Gerenciamento de Contatos 📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Um aplicativo React Native desenvolvido com Expo para gerenciar contatos pessoais de forma simples e segura, com autenticação e armazenamento em nuvem usando Firebase.
 
-## Get started
+## ✨ Funcionalidades
 
-1. Install dependencies
+- 🔐 **Autenticação de usuários** (Login/Registro) com Firebase Auth
+- 👤 **Gerenciamento de contatos** (Adicionar, Editar, Excluir)
+- 🔍 **Busca em tempo real** por nome, email ou telefone
+- ☁️ **Sincronização automática** com Firebase Firestore
+- 📊 **Interface moderna** e responsiva
+- 🌐 **Suporte multiplataforma** (Android, iOS, Web)
 
-   ```bash
-   npm install
-   ```
+## 🚀 Como executar o projeto
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+### 1. Instalar dependências
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Configurar Firebase
 
-## Learn more
+#### 2.1. Criar projeto no Firebase
 
-To learn more about developing your project with Expo, look at the following resources:
+1. Acesse o [Firebase Console](https://console.firebase.google.com/)
+2. Clique em **"Adicionar projeto"** ou **"Create a project"**
+3. Digite o nome do projeto (ex: "meu-app-contatos")
+4. Aceite os termos e clique em **"Continuar"**
+5. Desabilite o Google Analytics (opcional) e clique em **"Criar projeto"**
+6. Aguarde a criação e clique em **"Continuar"**
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+#### 2.2. Adicionar app Web ao projeto
 
-## Join the community
+1. No painel do projeto, clique no ícone **"Web"** (`</>`)
+2. Digite um apelido para o app (ex: "Meu App Web")
+3. **Não** marque "Firebase Hosting" por enquanto
+4. Clique em **"Registrar app"**
+5. **Copie as credenciais de configuração** que aparecerem
 
-Join our community of developers creating universal apps.
+#### 2.3. Configurar Authentication
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+1. No menu lateral, vá em **"Authentication"** (Autenticação)
+2. Clique em **"Get started"** ou **"Vamos começar"**
+3. Na aba **"Sign-in method"**, clique em **"Email/Password"**
+4. **Ative** a opção "Email/Password"
+5. Clique em **"Salvar"**
+
+#### 2.4. Configurar Firestore Database
+
+1. No menu lateral, vá em **"Firestore Database"**
+2. Clique em **"Criar banco de dados"** ou **"Create database"**
+3. Selecione o modo **"Produção"** (Production mode)
+4. Escolha a localização (recomendado: `southamerica-east1` para Brasil)
+5. Clique em **"Ativar"** ou **"Enable"**
+
+#### 2.5. Configurar regras de segurança do Firestore
+
+1. Ainda na seção Firestore Database, vá na aba **"Regras"** ou **"Rules"**
+2. Substitua o conteúdo pelas seguintes regras:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /contatos/{contactId} {
+      // Permite leitura e escrita apenas se o usuário estiver autenticado
+      // e o documento pertencer ao usuário (usuarioId == auth.uid)
+      allow read, write: if request.auth != null && 
+                          resource.data.usuarioId == request.auth.uid;
+      // Permite criação de novos contatos se o usuário estiver autenticado
+      allow create: if request.auth != null && 
+                     request.resource.data.usuarioId == request.auth.uid;
+    }
+  }
+}
+```
+
+3. Clique em **"Publicar"** ou **"Publish"**
+
+#### 2.6. Adicionar configurações ao projeto
+
+1. Abra o arquivo `src/config/firebaseConfig.ts`
+2. Substitua as credenciais pelas que você copiou no passo 2.2:
+
+```typescript
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY_AQUI",
+  authDomain: "seu-projeto.firebaseapp.com",
+  projectId: "seu-projeto-id",
+  storageBucket: "seu-projeto.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abc123def456"
+};
+
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+```
+
+3. Salve o arquivo
+
+### 3. Iniciar o app
+
+```bash
+npx expo start
+```
+
+No terminal, você terá opções para abrir o app em:
+
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go) - app de desenvolvimento
+- Web browser (pressione `w` no terminal)
+
+## 📦 Gerar e Baixar APK para Android
+
+### Pré-requisitos
+
+- Conta no Expo (crie gratuitamente em [expo.dev/signup](https://expo.dev/signup))
+- Node.js instalado
+
+### Passo 1: Instalar EAS CLI
+
+Instale o EAS CLI globalmente no seu computador:
+
+```bash
+npm install -g eas-cli
+```
+
+### Passo 2: Fazer login no Expo
+
+```bash
+eas login
+```
+
+Digite seu **email/username** e **senha** da conta Expo quando solicitado.
+
+### Passo 3: Configurar o projeto para build
+
+```bash
+eas build:configure
+```
+
+- Quando perguntado **"Would you like to automatically create an EAS project?"**, digite `Y` (Yes)
+- Um arquivo `eas.json` será criado automaticamente
+
+### Passo 4: Gerar o APK
+
+```bash
+eas build --platform android --profile preview
+```
+
+Durante o processo:
+
+1. Quando perguntado **"Generate a new Android Keystore?"**, digite `Y` (Yes)
+   - O EAS vai gerar e armazenar o keystore automaticamente
+   
+2. O build será enviado para a nuvem do Expo
+   - Você verá o progresso no terminal
+   - O processo leva de **5 a 15 minutos**
+
+3. Ao finalizar, você receberá:
+   - ✅ Mensagem de sucesso: **"Build finished"**
+   - 🔗 Link direto para download do APK
+   - 📱 QR Code para escanear e instalar direto no celular
+
+### Passo 5: Baixar e instalar o APK
+
+#### Opção A: Pelo celular
+
+1. **Abra o link** fornecido no celular Android
+2. **Baixe o APK**
+3. **Instale o app**
+   - Se aparecer aviso de "Fonte desconhecida", vá em **Configurações > Segurança**
+   - Ative **"Permitir instalação de apps de fontes desconhecidas"**
+   - Volte e instale o APK
+
+#### Opção B: Pelo computador
+
+1. **Abra o link** no navegador do PC
+2. **Baixe o arquivo APK** para o computador
+3. **Transfira o APK** para o celular (via USB, email, WhatsApp, etc.)
+4. No celular, abra o arquivo APK e instale
+
+### Passo 6: Acompanhar builds anteriores
+
+Você pode visualizar todos os seus builds em:
+
+```
+https://expo.dev/accounts/SEU_USERNAME/projects/meuprimeiroapp/builds
+```
+
+### Notas importantes
+
+- ⚠️ O APK gerado com o perfil `preview` é para **testes** e não está otimizado para produção
+- 📦 Para gerar um APK de **produção** otimizado, use: `eas build --platform android --profile production`
+- 🔄 O keystore gerado é gerenciado automaticamente pelo EAS para builds futuros
+- 💾 Builds ficam disponíveis para download por **30 dias** no painel do Expo
+
+## 🛠️ Tecnologias utilizadas
+
+- **React Native** - Framework para desenvolvimento mobile
+- **Expo** - Plataforma para desenvolvimento React Native
+- **TypeScript** - Tipagem estática
+- **Firebase Auth** - Autenticação de usuários
+- **Firebase Firestore** - Banco de dados NoSQL em tempo real
+- **React Navigation** - Navegação entre telas
+- **Expo Vector Icons** - Ícones do Material Design
+
+## 📂 Estrutura do projeto
+
+```
+meuprimeiroapp/
+├── src/
+│   ├── config/
+│   │   └── firebaseConfig.ts    # Configuração do Firebase
+│   ├── navigation/
+│   │   └── AppNavigator.tsx     # Configuração de rotas
+│   ├── screens/
+│   │   ├── LoginScreen.tsx      # Tela de login
+│   │   ├── RegisterScreen.tsx   # Tela de registro
+│   │   ├── UserListScreen.tsx   # Tela principal (lista de contatos)
+│   │   ├── AddContactScreen.tsx # Adicionar contato
+│   │   └── EditContactScreen.tsx # Editar contato
+│   └── utils/
+│       └── alertHelper.ts       # Utilitários para alertas
+├── app.json
+├── App.tsx
+└── package.json
+```
+
+## 📱 Recursos do App
+
+### Tela de Login
+- Validação de email e senha
+- Mensagens de erro detalhadas
+- Redirecionamento automático após autenticação
+
+### Tela de Registro
+- Criação de nova conta
+- Validação de dados
+- Confirmação de senha
+
+### Lista de Contatos
+- Visualização de todos os contatos do usuário
+- Busca em tempo real
+- Ações rápidas (Editar/Excluir)
+- Botão flutuante para adicionar
+
+### Adicionar/Editar Contato
+- Campos: Nome, Email, Telefone, Idade
+- Validação de dados
+- Sincronização automática
+
+## 📄 Licença
+
+Este projeto foi desenvolvido para fins educacionais.
+
+## 👨‍💻 Autor
+
+Desenvolvido por [@renaneliakim1](https://github.com/renaneliakim1)
