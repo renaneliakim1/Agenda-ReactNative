@@ -202,6 +202,81 @@ https://expo.dev/accounts/SEU_USERNAME/projects/meuprimeiroapp/builds
 - 🔄 O keystore gerado é gerenciado automaticamente pelo EAS para builds futuros
 - 💾 Builds ficam disponíveis para download por **30 dias** no painel do Expo
 
+## 🌐 Deploy da Versão Web na Vercel
+
+O app possui suporte para web e pode ser hospedado na Vercel gratuitamente.
+
+### Pré-requisitos
+
+- Conta no [Vercel](https://vercel.com) (gratuita)
+- Repositório no GitHub com o código do projeto
+
+### Método 1: Deploy via GitHub (Recomendado)
+
+#### Passo 1: Fazer push para o GitHub
+
+Se ainda não fez, envie o código para o GitHub:
+
+```bash
+git add .
+git commit -m "Preparar para deploy na Vercel"
+git push origin main
+```
+
+#### Passo 2: Conectar o projeto na Vercel
+
+1. Acesse [vercel.com](https://vercel.com) e faça login com sua conta GitHub
+2. Clique em **"Add New Project"** ou **"Import Project"**
+3. Selecione o repositório **"ReactNative"**
+4. Clique em **"Import"**
+5. Nas configurações do projeto:
+   - **Framework Preset**: Deixe como "Other"
+   - **Build Command**: `npx expo export:web`
+   - **Output Directory**: `dist`
+6. Clique em **"Deploy"**
+
+#### Passo 3: Aguardar o deploy
+
+- O processo leva de **2 a 5 minutos**
+- Ao finalizar, você receberá uma URL (ex: `https://seu-projeto.vercel.app`)
+- O app estará disponível na web! 🎉
+
+### Método 2: Deploy via Vercel CLI
+
+#### Passo 1: Instalar Vercel CLI
+
+```bash
+npm install -g vercel
+```
+
+#### Passo 2: Fazer login
+
+```bash
+vercel login
+```
+
+#### Passo 3: Deploy
+
+Na pasta do projeto, execute:
+
+```bash
+vercel
+```
+
+Siga as instruções no terminal e pronto!
+
+### Atualizações automáticas
+
+- Após conectar via GitHub, **cada push** na branch `main` fará um **deploy automático**
+- Você pode visualizar todos os deploys no painel da Vercel
+
+### Notas importantes
+
+- ✅ A versão web usa as mesmas funcionalidades do Firebase (autenticação e banco de dados)
+- 🌐 O domínio fornecido pela Vercel é gratuito e permanente
+- 🔄 Você pode configurar um domínio personalizado no painel da Vercel
+- 📱 A versão web é totalmente responsiva e funciona em mobile browsers
+
 ## 🛠️ Tecnologias utilizadas
 
 - **React Native** - Framework para desenvolvimento mobile
