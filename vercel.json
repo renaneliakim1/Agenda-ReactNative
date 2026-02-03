@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd meuprimeiroapp && npx expo export:web",
+  "buildCommand": "cd meuprimeiroapp && npm install && npx expo export --platform web",
   "outputDirectory": "meuprimeiroapp/dist",
   "framework": null,
   "rewrites": [

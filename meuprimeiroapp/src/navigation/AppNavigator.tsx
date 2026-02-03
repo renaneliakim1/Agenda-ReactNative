@@ -9,6 +9,7 @@ import LoginScreen from '../screens/LoginScreen';
 import AddContactScreen from '../screens/AddContactScreen';
 import EditContactScreen from '../screens/EditContactScreen';
 import ContactListScreen from '../screens/ContactListScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import { auth } from '../config/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
@@ -17,6 +18,7 @@ import { NavigationContainer, useNavigationContainerRef } from '@react-navigatio
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
+  ForgotPassword: undefined;
   AddContact: undefined;
   EditContact: {
     contact: {
@@ -163,6 +165,15 @@ export default function AppNavigator() {
             component={RegisterScreen}
             options={{ 
               title: 'Criar Conta',
+              headerShown: true,
+            }}
+          />
+          
+          <Stack.Screen
+            name="ForgotPassword"
+            component={ForgotPasswordScreen}
+            options={{ 
+              title: 'Recuperar Senha',
               headerShown: true,
             }}
           />

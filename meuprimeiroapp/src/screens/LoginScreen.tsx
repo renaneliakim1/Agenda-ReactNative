@@ -234,10 +234,19 @@ export default function LoginScreen({ navigation }: any) {
 					</View>
 
 					<View style={styles.footer}>
-						<Text style={styles.footerText}>Não tem conta?</Text>
-						<TouchableOpacity onPress={() => navigation.navigate('Register')}>
-							<Text style={styles.registerLink}>Cadastre-se aqui</Text>
+						<TouchableOpacity 
+							style={styles.forgotPasswordContainer}
+							onPress={() => navigation.navigate('ForgotPassword')}
+						>
+							<Text style={styles.forgotPasswordLink}>Esqueci minha senha</Text>
 						</TouchableOpacity>
+
+						<View style={styles.registerContainer}>
+							<Text style={styles.footerText}>Não tem conta?</Text>
+							<TouchableOpacity onPress={() => navigation.navigate('Register')}>
+								<Text style={styles.registerLink}>Cadastre-se aqui</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
@@ -389,6 +398,19 @@ const styles = StyleSheet.create({
 		elevation: 2,
 	},
 	footer: {
+		alignItems: 'center',
+		gap: 12,
+	},
+	forgotPasswordContainer: {
+		marginBottom: 8,
+	},
+	forgotPasswordLink: {
+		fontSize: 14,
+		color: '#6366F1',
+		fontWeight: '600',
+		letterSpacing: 0.3,
+	},
+	registerContainer: {
 		alignItems: 'center',
 		gap: 4,
 	},
