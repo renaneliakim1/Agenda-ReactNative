@@ -3,12 +3,12 @@
 Um aplicativo React Native desenvolvido com Expo para gerenciar contatos pessoais de forma simples e segura, com autenticação e armazenamento em nuvem usando Firebase.
 
 
-![Texto Alternativo](assets/images/Screenshot_20260202_224113.png)
+![Texto Alternativo](/meuprimeiroapp/assets/images/Screenshot_20260202_224113.png)
 
-![Texto Alternativo](assets/images/Screenshot_20260202_224327.png)
+![Texto Alternativo](/meuprimeiroapp/assets/images/Screenshot_20260202_224327.png)
 
 
-![Texto Alternativo](assets/images/Screenshot_20260202_224337.png)
+![Texto Alternativo](/meuprimeiroapp/assets/images/Screenshot_20260202_224337.png)
 
 ## ✨ Funcionalidades
 
