@@ -56,20 +56,46 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
 		try {
 			console.log('📧 Enviando email de redefinição de senha...');
-			await sendPasswordResetEmail(auth, email.trim());
+			
+			// Configurar URL de redirecionamento após redefinir senha
+			let redirectUrl = 'https://react-native-ebon.vercel.app/';
+			
+			// Para web, detecta automaticamente a URL (localhost ou produção)
+			if (Platform.OS === 'web' && typeof window !== 'undefined') {
+				redirectUrl = window.location.origin + '/';
+			}
+			
+			const actionCodeSettings = {
+				url: redirectUrl,
+				handleCodeInApp: false,
+			};
+
+			console.log('🔗 URL de redirecionamento:', redirectUrl);
+			await sendPasswordResetEmail(auth, email.trim(), actionCodeSettings);
 			
 			console.log('✅ Email enviado com sucesso!');
 			
-			mostrarAlerta(
-				'Email Enviado!',
-				`Um link para redefinir sua senha foi enviado para:\n\n${email}\n\nVerifique sua caixa de entrada e também a pasta de spam.\n\nApós alterar sua senha, volte ao app para fazer login novamente.`,
-				[
-					{
-						text: 'OK',
-						onPress: () => navigation.navigate('Login')
-					}
-				]
-			);
+			if (Platform.OS === 'web') {
+				window.alert(
+					'Email Enviado!\n\n' +
+					`Um link para redefinir sua senha foi enviado para:\n\n${email}\n\n` +
+					'Verifique sua caixa de entrada e também a pasta de spam.\n\n' +
+					'Após redefinir sua senha, você será redirecionado automaticamente de volta ao app para fazer login.'
+				);
+				// Redirecionar após fechar o alert no web
+				navigation.navigate('Login');
+			} else {
+				Alert.alert(
+					'Email Enviado!',
+					`Um link para redefinir sua senha foi enviado para:\n\n${email}\n\nVerifique sua caixa de entrada e também a pasta de spam.\n\nApós alterar sua senha, volte ao app para fazer login novamente.`,
+					[
+						{
+							text: 'OK',
+							onPress: () => navigation.navigate('Login')
+						}
+					]
+				);
+			}
 		} catch (error: any) {
 			console.error('❌ Erro ao enviar email:', error);
 			console.error('Código do erro:', error?.code);
