@@ -42,6 +42,13 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           color="green"
           onPress={() => navigation.navigate('UserList')} 
         />
+
+        <View style = {{ marginTop: 10 }} />
+
+        <Button
+          title="Ver Perfil"
+          onPress={() => navigation.navigate('Profile')}
+        />
     </View>
   );
 }

@@ -1,203 +1,253 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ScrollView, 
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, ActivityIndicator, StyleSheet, Button, Alert, TextInput, TouchableOpacity } from 'react-native';
+import { db, auth } from '../config/firebaseConfig';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 
-export default function ProfileScreen({ navigation }: any) {
+export default function ProfileScreen({ navigation }: { navigation: any }) {
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<any | null>(null);
+  const [editing, setEditing] = useState(false);
   const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('');
-  const [idade, setIdade] = useState('');
+  const [telefone, setTelefone] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    console.log('ProfileScreen montada - Tela de Cadastro aberta');
-    return () => {
-      console.log('ProfileScreen desmontada');
+    let mounted = true;
+
+    const loadUser = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          console.log('Usuário não autenticado');
+          if (mounted) setLoading(false);
+          return;
+        }
+
+        const userRef = doc(db, 'users', currentUser.uid);
+        const snap = await getDoc(userRef);
+
+        if (snap.exists()) {
+          const data = snap.data();
+          if (mounted) {
+            setUserData(data);
+            setNome(data?.nome || '');
+            setTelefone(data?.telefone || '');
+          }
+        } else {
+          console.log('Documento do usuário não encontrado em users/');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados do usuário:', error);
+      } finally {
+        if (mounted) setLoading(false);
+      }
     };
+
+    loadUser();
+
+    return () => { mounted = false; };
   }, []);
 
-  const handleSalvar = () => {
-    if (!nome || !email || !idade) {
-      Alert.alert('Aviso', 'Preencha todos os campos!');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Erro ao sair:', error);
+      Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
+    }
+  };
+
+  const handleStartEdit = () => {
+    setEditing(true);
+  };
+
+  const handleCancel = () => {
+    setEditing(false);
+    // reset fields to current data
+    setNome(userData?.nome || '');
+    setTelefone(userData?.telefone || '');
+  };
+
+  const handleSave = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      Alert.alert('Erro', 'Usuário não autenticado');
       return;
     }
-    console.log('Cadastro salvo:', { nome, email, idade });
-    Alert.alert('Sucesso', `Usuário ${nome} cadastrado com sucesso!`);
-    setNome('');
-    setEmail('');
-    setIdade('');
+
+    setSaving(true);
+    try {
+      const userRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userRef, {
+        nome: nome || '',
+        telefone: telefone || '',
+      });
+      // refresh local state
+      setUserData((prev: any) => ({ ...prev, nome, telefone }));
+      setEditing(false);
+    } catch (error) {
+      console.error('Erro ao salvar perfil:', error);
+      Alert.alert('Erro', 'Não foi possível salvar o perfil. Tente novamente.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleVoltar = () => {
-    navigation.goBack?.();
-  };
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#6366F1" />
+        <Text style={styles.loadingText}>Carregando perfil...</Text>
+      </View>
+    );
+  }
+
+  const displayName = userData?.nome || auth.currentUser?.displayName || 'Sem nome';
+  const displayEmail = userData?.email || auth.currentUser?.email || 'Sem email';
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
-    >
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={true}
-        scrollEventThrottle={16}
-      >
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Cadastro de Usuário</Text>
-          <Text style={styles.subtitle}>Preencha os dados abaixo</Text>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.label}>Nome</Text>
+        <Text style={styles.value}>{displayName}</Text>
 
-        <View style={styles.card}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nome Completo</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite seu nome"
-              value={nome}
-              onChangeText={setNome}
-              placeholderTextColor="#bbb"
-            />
-          </View>
+        <Text style={styles.label}>E-mail</Text>
+        <Text style={styles.value}>{displayEmail}</Text>
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite seu email"
-              value={email}
-              onChangeText={setEmail}
-              placeholderTextColor="#bbb"
-              keyboardType="email-address"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Idade</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite sua idade"
-              value={idade}
-              onChangeText={setIdade}
-              placeholderTextColor="#bbb"
-              keyboardType="numeric"
-            />
-          </View>
-
-          <TouchableOpacity style={styles.buttonSalvar} onPress={handleSalvar}>
-            <Text style={styles.buttonText}>SALVAR</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.buttonVoltar} onPress={handleVoltar}>
-            <Text style={styles.buttonVoltarText}>VOLTAR</Text>
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.label}>Telefone</Text>
+        <Text style={styles.value}>{userData?.telefone || 'Sem telefone'}</Text>
       </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+      <View style={{ marginTop: 20, width: '100%' }} />
+
+      {editing ? (
+        <View style={{ width: '100%' }}>
+          <Text style={styles.label}>Nome</Text>
+          <TextInput
+            style={styles.input}
+            value={nome}
+            onChangeText={setNome}
+            placeholder="Nome"
+            placeholderTextColor="#999"
+          />
+
+          <Text style={styles.label}>Telefone</Text>
+          <TextInput
+            style={styles.input}
+            value={telefone}
+            onChangeText={setTelefone}
+            placeholder="Telefone"
+            placeholderTextColor="#999"
+            keyboardType="phone-pad"
+          />
+
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving}>
+              <Text style={styles.saveButtonText}>{saving ? 'Salvando...' : 'Salvar'}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} disabled={saving}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        <>
+          <TouchableOpacity style={styles.editButton} onPress={handleStartEdit}>
+            <Text style={styles.editButtonText}>Editar Perfil</Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 10 }} />
+
+          <Button title="Sair" color="#EF4444" onPress={handleLogout} />
+        </>
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
     padding: 20,
-    paddingTop: 40,
-    paddingBottom: 40,
-  },
-  header: {
-    marginBottom: 30,
+    backgroundColor: '#f5f5f5',
     alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    fontWeight: '400',
+    justifyContent: 'center',
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 25,
+    width: '100%',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
     elevation: 3,
   },
-  inputGroup: {
-    marginBottom: 20,
-  },
   label: {
-    fontSize: 14,
+    fontSize: 12,
+    color: '#666',
+    marginTop: 10,
+  },
+  value: {
+    fontSize: 18,
+    color: '#333',
     fontWeight: '600',
-    color: '#1F2937',
-    marginBottom: 8,
-    letterSpacing: 0.3,
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#666',
   },
   input: {
-    borderWidth: 1.5,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#1F2937',
-    backgroundColor: '#F9FAFB',
-    fontWeight: '500',
-  },
-  buttonSalvar: {
-    backgroundColor: '#6366F1',
-    borderRadius: 12,
-    paddingVertical: 16,
-    marginTop: 10,
-    marginBottom: 12,
-    alignItems: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  buttonVoltar: {
-    backgroundColor: '#E5E7EB',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-  },
-  buttonVoltarText: {
-    color: '#4B5563',
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontSize: 16,
+    color: '#111827',
+    backgroundColor: '#fff',
+    marginTop: 6,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: '#6366F1',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  saveButtonText: {
+    color: '#fff',
     fontWeight: '700',
-    letterSpacing: 0.5,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#E5E7EB',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#374151',
+    fontWeight: '700',
+  },
+  editButton: {
+    width: '100%',
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  editButtonText: {
+    color: '#fff',
+    fontWeight: '700',
   },
 });

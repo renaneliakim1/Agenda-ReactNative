@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
+import ProfileScreen from '../screens/ProfileScreen';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -35,6 +36,7 @@ export type RootStackParamList = {
   Home: undefined;
   Details: undefined;
   UserList: undefined;
+  Profile: undefined;
 };
 
 // Criação da pilha de navegação
@@ -150,6 +152,7 @@ export default function AppNavigator() {
 
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Details" component={DetailsScreen} options={{title: 'Detalhes'}}/>
+          <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
         </>
       ) : (
         // Telas para usuários não autenticados
