@@ -199,9 +199,9 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
       <View style={styles.header}>
         <Text style={styles.title}>Meus Contatos</Text>
         <Text style={styles.subtitle}>Total: {contacts.length}</Text>
-        <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
+       {/*  <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
           <MaterialCommunityIcons name="account" size={24} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <MaterialCommunityIcons name="logout" size={24} color="#fff" />
         </TouchableOpacity>

@@ -1,7 +1,8 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import { Platform } from 'react-native';
 
 // Your web app's Firebase configuration
 // As credenciais são carregadas do arquivo .env
@@ -21,14 +22,20 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// Configurar persistência de autenticação
-if (typeof window !== 'undefined') {
-  setPersistence(auth, browserLocalPersistence)
-    .then(() => {
-      console.log('✅ Persistência de autenticação configurada');
+// Configurar persistência de autenticação apenas no web
+if (Platform.OS === 'web') {
+  import('firebase/auth')
+    .then(({ setPersistence, browserLocalPersistence }) => {
+      setPersistence(auth, browserLocalPersistence)
+        .then(() => {
+          console.log('✅ Persistência de autenticação configurada');
+        })
+        .catch((error) => {
+          console.error('❌ Erro ao configurar persistência:', error);
+        });
     })
-    .catch((error) => {
-      console.error('❌ Erro ao configurar persistência:', error);
+    .catch((err) => {
+      console.error('❌ Erro ao importar firebase/auth para persistência web:', err);
     });
 }
 

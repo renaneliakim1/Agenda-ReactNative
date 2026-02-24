@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Button, Alert, TextInput, TouchableOpacity } from 'react-native';
 import { db, auth } from '../config/firebaseConfig';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
@@ -75,20 +75,27 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
       Alert.alert('Erro', 'Usuário não autenticado');
       return;
     }
+    // debug: log payload and uid
+    console.log('[Profile] handleSave payload', { uid: currentUser.uid, nome, telefone });
 
     setSaving(true);
     try {
       const userRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userRef, {
+      // use setDoc with merge to create the document if it doesn't exist
+      await setDoc(userRef, {
         nome: nome || '',
         telefone: telefone || '',
-      });
+      }, { merge: true });
+
       // refresh local state
       setUserData((prev: any) => ({ ...prev, nome, telefone }));
       setEditing(false);
-    } catch (error) {
-      console.error('Erro ao salvar perfil:', error);
-      Alert.alert('Erro', 'Não foi possível salvar o perfil. Tente novamente.');
+
+      console.log('[Profile] Perfil salvo com sucesso', { uid: currentUser.uid });
+    } catch (error: any) {
+      const message = error?.message || JSON.stringify(error) || String(error);
+      console.error('[Profile] Erro ao salvar perfil:', error);
+      Alert.alert('Erro ao salvar', message);
     } finally {
       setSaving(false);
     }

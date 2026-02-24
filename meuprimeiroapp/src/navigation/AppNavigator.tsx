@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import Header from '../screens/Header';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import RegisterScreen from '../screens/RegisterScreen';
@@ -40,7 +41,6 @@ export type RootStackParamList = {
 };
 
 // Criação da pilha de navegação
-
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
@@ -48,20 +48,21 @@ export default function AppNavigator() {
   const [user, setUser] = useState<any>(null);
   const navigationRef = useNavigationContainerRef();
   const previousUserRef = useRef<any>(undefined);
+  const [currentRoute, setCurrentRoute] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     console.log('🔵 Verificando estado de autenticação...');
-    
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log('🔄 Estado de autenticação mudou:', currentUser ? `Logado: ${currentUser.email}` : 'Deslogado');
       console.log('📊 Estado anterior:', previousUserRef.current ? 'tinha usuário' : 'sem usuário');
       console.log('📊 Estado novo:', currentUser ? 'tem usuário' : 'sem usuário');
-      
+
       // Se estava logado e agora não está mais (LOGOUT)
       if (previousUserRef.current && !currentUser) {
         console.log('🚪 LOGOUT DETECTADO! Redirecionando para Login...');
         setUser(null);
-        
+
         // Força navegação para Login após um pequeno delay
         setTimeout(() => {
           if (navigationRef.isReady()) {
@@ -75,9 +76,9 @@ export default function AppNavigator() {
       } else {
         setUser(currentUser);
       }
-      
+
       previousUserRef.current = currentUser;
-      
+
       if (initializing) {
         setInitializing(false);
       }
@@ -97,92 +98,97 @@ export default function AppNavigator() {
 
   console.log('🎯 Renderizando navegação. Usuário:', user ? 'Autenticado' : 'Não autenticado');
 
+  // Oculta o Header apenas nas rotas de Login e Register
+  const shouldShowHeader = !(currentRoute === 'Login' || currentRoute === 'Register');
+
   return (
-    <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator 
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: '#6366F1',
-        },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-      }}
+    <NavigationContainer
+      ref={navigationRef}
+      onReady={() => setCurrentRoute(navigationRef.getCurrentRoute()?.name)}
+      onStateChange={() => setCurrentRoute(navigationRef.getCurrentRoute()?.name)}
     >
-      {user ? (
-        // Telas para usuários autenticados
-        <>
-          <Stack.Screen
-            name="UserList"
-            component={UserListScreen}
-            options={{ 
-              title: 'Lista de Usuários',
-              headerShown: false,
-              headerLeft: () => null,
-            }}
-          />
-          
-          <Stack.Screen
-            name="ContactList"
-            component={ContactListScreen}
-            options={{ 
-              title: 'Meus Contatos', 
-              headerShown: true,
-            }}
-          />
-          
-          <Stack.Screen
-            name="AddContact"
-            component={AddContactScreen}
-            options={{ 
-              title: 'Adicionar Contato',
-              headerShown: true,
-            }}
-          />
+      {shouldShowHeader && <Header />}
 
-          <Stack.Screen
-            name="EditContact"
-            component={EditContactScreen}
-            options={{ 
-              title: 'Editar Contato',
-              headerShown: true,
-            }}
-          />
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#6366F1',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        {user ? (
+          // Telas para usuários autenticados
+          <>
+            <Stack.Screen
+              name="UserList"
+              component={UserListScreen}
+              options={{
+                title: 'Lista de Usuários',
+                headerShown: false,
+                headerLeft: () => null,
+              }}
+            />
 
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Details" component={DetailsScreen} options={{title: 'Detalhes'}}/>
-          <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
-        </>
-      ) : (
-        // Telas para usuários não autenticados
-        <>
-          <Stack.Screen 
-            name="Login" 
-            component={LoginScreen}
-            options={{ headerShown: false }}
-          />
-          
-          <Stack.Screen
-            name="Register"
-            component={RegisterScreen}
-            options={{ 
-              title: 'Criar Conta',
-              headerShown: true,
-            }}
-          />
-          
-          <Stack.Screen
-            name="ForgotPassword"
-            component={ForgotPasswordScreen}
-            options={{ 
-              title: 'Recuperar Senha',
-              headerShown: true,
-            }}
-          />
-        </>
-      )}
-    </Stack.Navigator>
+            <Stack.Screen
+              name="ContactList"
+              component={ContactListScreen}
+              options={{
+                title: 'Meus Contatos',
+                headerShown: true,
+              }}
+            />
+
+            <Stack.Screen
+              name="AddContact"
+              component={AddContactScreen}
+              options={{
+                title: 'Adicionar Contato',
+                headerShown: true,
+              }}
+            />
+
+            <Stack.Screen
+              name="EditContact"
+              component={EditContactScreen}
+              options={{
+                title: 'Editar Contato',
+                headerShown: true,
+              }}
+            />
+
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Details" component={DetailsScreen} options={{ title: 'Detalhes' }} />
+            <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
+          </>
+        ) : (
+          // Telas para usuários não autenticados
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+
+            <Stack.Screen
+              name="Register"
+              component={RegisterScreen}
+              options={{
+                title: 'Criar Conta',
+                headerShown: true,
+              }}
+            />
+
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+              options={{
+                title: 'Recuperar Senha',
+                headerShown: true,
+              }}
+            />
+          </>
+        )}
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

@@ -319,112 +319,94 @@ export default function RegisterScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-	safeArea: {
-		flex: 1,
-		backgroundColor: '#F4F4F5', // cinza bem claro
-	},
-	container: {
-		flex: 1,
-		backgroundColor: '#FFF', // branco
-	},
-	scrollContent: {
-		flexGrow: 1,
-		justifyContent: 'center',
-		paddingHorizontal: 20,
-		paddingVertical: 40,
-	},
-	headerContainer: {
-		alignItems: 'center',
-		marginBottom: 32,
-	},
-	title: {
-		fontSize: 32,
-		fontWeight: '700',
-		color: '#22223B',
-		marginBottom: 8,
-		textAlign: 'center',
-	},
-	subtitle: {
-		fontSize: 16,
-		color: '#6B7280',
-		textAlign: 'center',
-		fontWeight: '400',
-	},
-	formContainer: {
-		marginBottom: 24,
-		gap: 12,
-	},
-	inputGroup: {
-		marginBottom: 4,
-	},
-	label: {
-		fontSize: 14,
-		fontWeight: '600',
-		marginBottom: 8,
-		color: '#22223B',
-		letterSpacing: 0.3,
-	},
-	input: {
-		borderWidth: 1.2,
-		borderColor: '#D1D5DB',
-		borderRadius: 4, // quadrado
-		paddingHorizontal: 14,
-		paddingVertical: 12,
-		fontSize: 16,
-		backgroundColor: '#F8FAFC', // cinza muito claro
-		color: '#22223B',
-		fontWeight: '500',
-	},
-	button: {
-		backgroundColor: '#2563EB', // azul
-		borderRadius: 4, // quadrado
-		paddingVertical: 14,
-		paddingHorizontal: 20,
-		alignItems: 'center',
-		marginTop: 12,
-		elevation: 2,
-	},
-	buttonDisabled: {
-		backgroundColor: '#A5B4FC',
-		opacity: 0.7,
-	},
-	buttonText: {
-		color: '#FFF',
-		fontSize: 16,
-		fontWeight: '700',
-		letterSpacing: 0.5,
-	},
-	buttonRed: {
-		backgroundColor: '#DC2626', // vermelho
-		borderRadius: 4,
-		paddingVertical: 14,
-		paddingHorizontal: 20,
-		alignItems: 'center',
-		marginTop: 12,
-		elevation: 2,
-	},
-	buttonGreen: {
-		backgroundColor: '#16A34A', // verde
-		borderRadius: 4,
-		paddingVertical: 14,
-		paddingHorizontal: 20,
-		alignItems: 'center',
-		marginTop: 12,
-		elevation: 2,
-	},
-	footer: {
-		alignItems: 'center',
-		gap: 4,
-	},
-	footerText: {
-		fontSize: 14,
-		color: '#6B7280',
-		fontWeight: '400',
-	},
-	loginLink: {
-		fontSize: 14,
-		color: '#2563EB', // azul
-		fontWeight: '700',
-		letterSpacing: 0.3,
-	},
+	 safeArea: {
+		 flex: 1,
+		 backgroundColor: '#F4F4F5',
+	 },
+	 container: {
+		 flex: 1,
+		 backgroundColor: '#FFF',
+	 },
+	 scrollContent: {
+		 flexGrow: 1,
+		 justifyContent: 'center',
+		 paddingHorizontal: 20,
+		 paddingVertical: 40,
+	 },
+	 headerContainer: {
+		 alignItems: 'center',
+		 marginBottom: 32,
+	 },
+	 title: {
+		 fontSize: 32,
+		 fontWeight: '700',
+		 color: '#22223B',
+		 marginBottom: 8,
+		 textAlign: 'center',
+	 },
+	 subtitle: {
+		 fontSize: 16,
+		 color: '#6B7280',
+		 textAlign: 'center',
+		 fontWeight: '400',
+	 },
+	 formContainer: {
+		 marginBottom: 24,
+		 gap: 12,
+	 },
+	 inputGroup: {
+		 marginBottom: 4,
+	 },
+	 label: {
+		 fontSize: 14,
+		 fontWeight: '600',
+		 marginBottom: 8,
+		 color: '#22223B',
+		 letterSpacing: 0.3,
+	 },
+	 input: {
+		 borderWidth: 1.2,
+		 borderColor: '#D1D5DB',
+		 borderRadius: 4,
+		 paddingHorizontal: 14,
+		 paddingVertical: 12,
+		 fontSize: 16,
+		 backgroundColor: '#F8FAFC',
+		 color: '#22223B',
+		 fontWeight: '500',
+	 },
+	 button: {
+		 backgroundColor: '#2563EB',
+		 borderRadius: 4,
+		 paddingVertical: 14,
+		 paddingHorizontal: 20,
+		 alignItems: 'center',
+		 marginTop: 12,
+		 elevation: 2,
+	 },
+	 buttonDisabled: {
+		 backgroundColor: '#A5B4FC',
+		 opacity: 0.7,
+	 },
+	 buttonText: {
+		 color: '#FFF',
+		 fontSize: 16,
+		 fontWeight: '700',
+		 letterSpacing: 0.5,
+	 },
+	 footer: {
+		 alignItems: 'center',
+		 gap: 4,
+	 },
+	 footerText: {
+		 fontSize: 14,
+		 color: '#6B7280',
+		 fontWeight: '400',
+	 },
+	 loginLink: {
+		 fontSize: 14,
+		 color: '#2563EB',
+		 fontWeight: '700',
+		 letterSpacing: 0.3,
+	 },
 });
