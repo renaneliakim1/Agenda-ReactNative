@@ -187,7 +187,7 @@ export default function LoginScreen({ navigation }: any) {
 							<Text style={styles.label}>Email</Text>
 							<TextInput
 								style={styles.input}
-								placeholder="seu@email.com"
+								placeholder="seu_email@email.com"
 								placeholderTextColor="#9CA3AF"
 								keyboardType="email-address"
 								autoCapitalize="none"

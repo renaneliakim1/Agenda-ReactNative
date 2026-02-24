@@ -9,6 +9,7 @@ import {
 	SafeAreaView,
 	ActivityIndicator,
 	useWindowDimensions,
+	Platform,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
@@ -84,50 +85,71 @@ export default function ContactListScreen({ navigation }: Props) {
 	}, []);
 
 	const handleDeleteContact = (id: string, nome: string) => {
+		const performDelete = async () => {
+			try {
+				await deleteDoc(doc(db, 'contatos', id));
+				Alert.alert('Sucesso', 'Contato excluído com sucesso');
+			} catch (error) {
+				console.error('Erro ao excluir contato:', error);
+				Alert.alert('Erro', 'Não foi possível excluir o contato');
+			}
+		};
+
+		if (Platform.OS === 'web' && typeof window !== 'undefined') {
+			const confirmed = window.confirm(`Deseja realmente excluir ${nome}?`);
+			if (confirmed) performDelete();
+			return;
+		}
+
 		Alert.alert(
 			'Confirmar Exclusão',
 			`Deseja realmente excluir ${nome}?`,
 			[
 				{ text: 'Cancelar', style: 'cancel' },
-				{
-					text: 'Excluir',
-					style: 'destructive',
-					onPress: async () => {
-						try {
-							await deleteDoc(doc(db, 'contatos', id));
-							Alert.alert('Sucesso', 'Contato excluído com sucesso');
-						} catch (error) {
-							console.error('Erro ao excluir contato:', error);
-							Alert.alert('Erro', 'Não foi possível excluir o contato');
-						}
-					},
-				},
+				{ text: 'Excluir', style: 'destructive', onPress: performDelete },
 			]
 		);
 	};
 
 	const handleLogout = async () => {
 		console.log('🔵 Botão de logout clicado');
-		
-		// Confirmação via window.confirm para web
-		const confirmLogout = window.confirm('Deseja realmente sair da sua conta?');
-		console.log('🔵 Resposta do usuário:', confirmLogout ? 'Sim' : 'Não');
-		
-		if (!confirmLogout) {
+
+		const confirmLogout = async (): Promise<boolean> => {
+			if (Platform.OS === 'web' && typeof window !== 'undefined') {
+				return window.confirm('Deseja realmente sair da sua conta?');
+			}
+
+			return new Promise((resolve) => {
+				Alert.alert(
+					'Confirmação',
+					'Deseja realmente sair da sua conta?',
+					[
+						{ text: 'Cancelar', onPress: () => resolve(false), style: 'cancel' },
+						{ text: 'Sair', onPress: () => resolve(true), style: 'destructive' },
+					],
+					{ cancelable: true }
+				);
+			});
+		};
+
+		const confirmed = await confirmLogout();
+		console.log('🔵 Resposta do usuário:', confirmed ? 'Sim' : 'Não');
+		if (!confirmed) {
 			console.log('❌ Logout cancelado pelo usuário');
 			return;
 		}
-		
+
 		try {
 			console.log('🔄 Fazendo logout...');
 			const currentUserId = auth.currentUser?.uid;
 			console.log('👤 Usuário antes do logout:', currentUserId);
-			
-			// Faz o signOut
+
 			await signOut(auth);
 			console.log('✅ Logout realizado com sucesso');
 			console.log('👤 Usuário após logout:', auth.currentUser);
-			
+
+			navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+
 		} catch (error) {
 			console.error('❌ Erro ao fazer logout:', error);
 			Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
@@ -185,9 +207,9 @@ export default function ContactListScreen({ navigation }: Props) {
 							{contatos.length} {contatos.length === 1 ? 'contato' : 'contatos'}
 						</Text>
 					</View>
-					<TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+					{/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
 						<MaterialCommunityIcons name="logout" size={24} color="#EF4444" />
-					</TouchableOpacity>
+					</TouchableOpacity> */}
 				</View>
 
 				{contatos.length === 0 ? (

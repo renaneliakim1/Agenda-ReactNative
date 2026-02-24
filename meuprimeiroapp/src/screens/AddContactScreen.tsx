@@ -11,6 +11,8 @@ import {
 	ScrollView,
 	KeyboardAvoidingView,
 	Platform,
+	Modal,
+	Pressable,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -30,6 +32,9 @@ export default function AddContactScreen({ navigation }: Props) {
 	const [idade, setIdade] = useState('');
 	const [telefone, setTelefone] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [errorModalVisible, setErrorModalVisible] = useState(false);
+	const [errorTitle, setErrorTitle] = useState('');
+	const [errorMessageDetails, setErrorMessageDetails] = useState('');
 
 	// Validação de e-mail
 	function isValidEmail(email: string) {
@@ -104,42 +109,39 @@ export default function AddContactScreen({ navigation }: Props) {
 			
 			console.log('✅ Contato salvo com sucesso! ID:', docRef.id);
 
-						Alert.alert(
-							'Sucesso!',
-							'Contato adicionado com sucesso!',
-							[
-								{
-									text: 'OK',
-									onPress: () => {
-										console.log('Limpando formulário e retornando para lista...');
-										// Limpar formulário
-										setNome('');
-										setEmail('');
-										setIdade('');
-										setTelefone('');
-										// Navegar para a lista de contatos
-										navigation.navigate('ContactList');
-									},
-								},
-							]
-						);
+			// Limpar formulário e garantir que loading seja desligado antes de navegar
+			setNome('');
+			setEmail('');
+			setIdade('');
+			setTelefone('');
+			setLoading(false);
+
+			try {
+				if (Platform.OS === 'web' && typeof window !== 'undefined') {
+					window.alert('Contato adicionado com sucesso!');
+				}
+			} catch (e) {
+				console.warn('Não foi possível exibir window.alert:', e);
+			}
+
+			// Navegar e limpar pilha independentemente da plataforma
+			navigation.reset({ index: 0, routes: [{ name: 'ContactList' }] });
 
 		} catch (error: any) {
 			console.error('❌ ERRO AO ADICIONAR CONTATO:', error);
+			console.error('Erro (raw):', JSON.stringify(error));
 			console.error('Código do erro:', error?.code);
 			console.error('Mensagem:', error?.message);
-			
+
 			let message = 'Não foi possível adicionar o contato.';
-			
 			if (error?.code === 'permission-denied') {
-				message = 'Erro de permissão no Firestore.\n\n' +
-					'Verifique as regras de segurança:\n' +
-					'1. Acesse console.firebase.google.com\n' +
-					'2. Vá em Firestore Database > Regras\n' +
-					'3. Certifique-se de que contatos permite escrita para usuários autenticados';
+				message = 'Erro de permissão no Firestore. Verifique regras no console Firebase.';
 			}
-			
-			Alert.alert('Erro', message);
+
+			setErrorTitle('Erro ao adicionar contato');
+			setErrorMessageDetails(`${message}\n\nCódigo: ${error?.code || 'N/A'}\nMensagem: ${error?.message || 'N/D'}`);
+			setErrorModalVisible(true);
+
 		} finally {
 			setLoading(false);
 		}
@@ -222,6 +224,27 @@ export default function AddContactScreen({ navigation }: Props) {
 								<Text style={styles.buttonText}>Adicionar Contato</Text>
 							)}
 						</TouchableOpacity>
+
+						{/* Error details modal */}
+						<Modal
+							visible={errorModalVisible}
+							transparent
+							animationType="slide"
+							onRequestClose={() => setErrorModalVisible(false)}
+						>
+							<View style={modalStyles.overlay}>
+								<View style={modalStyles.modal}>
+									<Text style={modalStyles.modalTitle}>{errorTitle}</Text>
+									<Text style={modalStyles.modalMessage}>{errorMessageDetails}</Text>
+									<Pressable
+										style={modalStyles.modalButton}
+										onPress={() => setErrorModalVisible(false)}
+									>
+										<Text style={modalStyles.modalButtonText}>Fechar</Text>
+									</Pressable>
+								</View>
+							</View>
+						</Modal>
 
 						<TouchableOpacity
 							style={styles.secondaryButton}
@@ -332,4 +355,43 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		letterSpacing: 0.5,
 	},
+});
+
+const modalStyles = StyleSheet.create({
+	overlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0,0,0,0.5)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		padding: 20,
+	},
+	modal: {
+		width: '100%',
+		backgroundColor: '#fff',
+		borderRadius: 12,
+		padding: 20,
+		maxHeight: '80%'
+	},
+	modalTitle: {
+		fontSize: 18,
+		fontWeight: '700',
+		marginBottom: 8,
+		color: '#111827'
+	},
+	modalMessage: {
+		fontSize: 14,
+		color: '#374151',
+		marginBottom: 16,
+		lineHeight: 20
+	},
+	modalButton: {
+		backgroundColor: '#6366F1',
+		paddingVertical: 12,
+		borderRadius: 10,
+		alignItems: 'center'
+	},
+	modalButtonText: {
+		color: '#fff',
+		fontWeight: '700'
+	}
 });

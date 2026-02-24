@@ -142,7 +142,7 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Meus Contatos</Text>
+          <Text style={styles.title}>Meus Conatos</Text>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#6366F1" />
