@@ -8,6 +8,7 @@ import {
 	Alert,
 	SafeAreaView,
 	ActivityIndicator,
+	useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
@@ -33,6 +34,9 @@ interface Contact {
 export default function ContactListScreen({ navigation }: Props) {
 	const [contatos, setContatos] = useState<Contact[]>([]);
 	const [loading, setLoading] = useState(true);
+
+ 	const { width } = useWindowDimensions();
+ 	const isMobile = width < 768;
 
 	useEffect(() => {
 		const user = auth.currentUser;
@@ -205,7 +209,7 @@ export default function ContactListScreen({ navigation }: Props) {
 				)}
 
 				<TouchableOpacity
-					style={styles.fab}
+					style={[styles.fab, isMobile && styles.fabMobile]}
 					onPress={() => navigation.navigate('AddContact')}
 				>
 					<MaterialCommunityIcons name="plus" size={28} color="#FFFFFF" />
@@ -344,5 +348,8 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.4,
 		shadowRadius: 8,
 		elevation: 6,
+	},
+	fabMobile: {
+		bottom: 60,
 	},
 });

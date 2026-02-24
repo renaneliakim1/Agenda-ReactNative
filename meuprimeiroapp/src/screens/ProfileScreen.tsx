@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Button, Alert, TextInput, TouchableOpacity } from 'react-native';
 import { db, auth } from '../config/firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
@@ -81,17 +81,22 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     setSaving(true);
     try {
       const userRef = doc(db, 'users', currentUser.uid);
-      // use setDoc with merge to create the document if it doesn't exist
-      await setDoc(userRef, {
+      // use setDoc with merge to create/update the document and add timestamp
+      const payload = {
         nome: nome || '',
         telefone: telefone || '',
-      }, { merge: true });
+        updatedAt: serverTimestamp(),
+      };
+
+      console.log('[Profile] Salvando payload:', payload, 'uid:', currentUser.uid);
+      await setDoc(userRef, payload, { merge: true });
 
       // refresh local state
-      setUserData((prev: any) => ({ ...prev, nome, telefone }));
+      setUserData((prev: any) => ({ ...prev, nome, telefone, updatedAt: new Date().toISOString() }));
       setEditing(false);
 
       console.log('[Profile] Perfil salvo com sucesso', { uid: currentUser.uid });
+      Alert.alert('Sucesso', 'Perfil salvo com sucesso.');
     } catch (error: any) {
       const message = error?.message || JSON.stringify(error) || String(error);
       console.error('[Profile] Erro ao salvar perfil:', error);

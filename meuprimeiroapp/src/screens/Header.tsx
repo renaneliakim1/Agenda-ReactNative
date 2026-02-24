@@ -6,35 +6,75 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   SafeAreaView,
+  Alert,
+  Platform,
 } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
-const BREAKPOINT = 769;
+const BREAKPOINT = 768;
 
 const Header: React.FC = () => {
   const { width } = useWindowDimensions();
   const isMobile = width < BREAKPOINT;
   const navigation = useNavigation<any>();
+  // menu base
+  const itemsBase = [
+    { key: 'home', label: 'Início', icon: 'home' },
+    { key: 'profile', label: 'Perfil', icon: 'account' },
+  ];
+
+  // adiciona o botão de logout apenas em mobile
+  const items = isMobile
+    ? [...itemsBase, { key: 'logout', label: 'Sair', icon: 'logout' }]
+    : itemsBase;
+
+  const handleItemPress = (key: string) => {
+    if (key === 'profile') return navigation.navigate('Profile');
+    if (key === 'home') return navigation.navigate('ContactList');
+
+    if (key === 'logout') {
+      // confirmação e logout
+      if (Platform.OS === 'web') {
+        const ok = window.confirm('Deseja realmente sair da sua conta?');
+        if (!ok) return;
+        // import dinâmico do auth/signOut para não adicionar side-effects se não precisar
+        import('../config/firebaseConfig')
+          .then(({ auth }) => import('firebase/auth').then(({ signOut }) => signOut(auth)))
+          .catch(() => window.alert('Erro ao sair.'));
+      } else {
+        Alert.alert('Sair', 'Deseja realmente sair da sua conta?', [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Sair',
+            style: 'destructive',
+            onPress: () => {
+              import('../config/firebaseConfig')
+                .then(({ auth }) => import('firebase/auth').then(({ signOut }) => signOut(auth)))
+                .catch(() => Alert.alert('Erro', 'Não foi possível sair.'));
+            },
+          },
+        ]);
+      }
+    }
+  };
 
   return (
     <>
       <SafeAreaView style={[styles.container, isMobile ? styles.bottom : styles.top]}>
-        <View style={styles.menu}>
-          {[
-            { key: 'home', label: 'Home', icon: '🏠' },
-            { key: 'profile', label: 'Perfil', icon: '👤' },
-          ].map((item) => (
+        <View style={[styles.menu, isMobile ? styles.menuMobile : styles.menuDesktop]}>
+          {items.map((item) => (
             <TouchableOpacity
               key={item.key}
-              style={styles.item}
-              onPress={() => {
-                if (item.key === 'profile') navigation.navigate('Profile');
-                else if (item.key === 'home') navigation.navigate('ContactList');
-              }}
+              style={[styles.item, !isMobile && styles.itemDesktop]}
+              onPress={() => handleItemPress(item.key)}
               accessibilityLabel={item.label}
             >
               {isMobile ? (
-                <Text style={styles.icon}>{item.icon}</Text>
+                <View style={styles.mobileItemInner}>
+                  <MaterialCommunityIcons name={item.icon} size={28} color="#6366F1" />
+                  <Text style={styles.mobileLabel}>{item.label}</Text>
+                </View>
               ) : (
                 <Text style={styles.text}>{item.label}</Text>
               )}
@@ -79,9 +119,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 56,
   },
+  menuMobile: {
+    justifyContent: 'center',
+  },
+  menuDesktop: {
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
   item: {
     paddingHorizontal: 12,
     paddingVertical: 8,
+  },
+  itemDesktop: {
+    marginRight: 12,
+    paddingHorizontal: 8,
+  },
+  mobileItemInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mobileLabel: {
+    fontSize: 11,
+    color: '#444',
+    marginTop: 2,
   },
   text: {
     fontSize: 16,

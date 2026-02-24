@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, ActivityIndicator, Platform, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
 import { useState, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { auth, db } from '../config/firebaseConfig';
 import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
 import { mostrarAlertaConfirmacao, mostrarSucesso, mostrarErro } from '../utils/alertHelper';
 
 interface Contact {
@@ -112,48 +111,7 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
     navigation.navigate('EditContact', { contact });
   };
 
-  const handleLogout = async () => {
-    if (Platform.OS === 'web') {
-      const confirmLogout = window.confirm('Deseja realmente sair da sua conta?');
-      
-      if (!confirmLogout) {
-        return;
-      }
-      
-      try {
-        console.log('🔄 Fazendo logout...');
-        await signOut(auth);
-        console.log('✅ Logout realizado');
-        // A navegação será tratada automaticamente pelo onAuthStateChanged no AppNavigator
-      } catch (error) {
-        console.error('❌ Erro ao fazer logout:', error);
-        window.alert('Erro ao sair. Tente novamente.');
-      }
-    } else {
-      Alert.alert(
-        'Sair',
-        'Deseja realmente sair da sua conta?',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          {
-            text: 'Sair',
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                console.log('🔄 Fazendo logout...');
-                await signOut(auth);
-                console.log('✅ Logout realizado');
-                // A navegação será tratada automaticamente pelo onAuthStateChanged no AppNavigator
-              } catch (error) {
-                console.error('❌ Erro ao fazer logout:', error);
-                Alert.alert('Erro', 'Não foi possível sair');
-              }
-            },
-          },
-        ]
-      );
-    }
-  };
+  
 
   const renderContact = ({ item }: { item: Contact }) => (
     <View style={styles.userCard}>
@@ -202,9 +160,6 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
        {/*  <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate('Profile')}>
           <MaterialCommunityIcons name="account" size={24} color="#fff" />
         </TouchableOpacity> */}
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <MaterialCommunityIcons name="logout" size={24} color="#fff" />
-        </TouchableOpacity>
       </View>
 
       {contacts.length > 0 && (
@@ -228,7 +183,7 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
       {contacts.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>📱</Text>
-          <Text style={styles.emptyMessage}>Nenhum contato cadastrado ainda.</Text>
+          <Text style={styles.emptyMessage}>Nenhum contato cadastrado 5555555555ainda.</Text>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => navigation.navigate('AddContact')}
@@ -274,7 +229,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   header: {
-    backgroundColor: '#6366F1',
+    backgroundColor: '#234ce1',
     padding: 20,
     paddingTop: 60,
     alignItems: 'center',

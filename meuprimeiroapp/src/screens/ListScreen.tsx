@@ -77,7 +77,13 @@ export default function ListScreen() {
               
             } catch (erro) {
               console.error('Erro ao deletar usuário:', erro);
-              Alert.alert('Erro', 'Não foi possível deletar o cadastro');
+              console.error('Código do erro:', (erro as any)?.code);
+              const codigo = (erro as any)?.code;
+              if (codigo === 'permission-denied') {
+                Alert.alert('Erro', 'Permissão negada: verifique as regras do Firestore para a coleção "usuarios"');
+              } else {
+                Alert.alert('Erro', 'Não foi possível deletar o cadastro');
+              }
             }
           },
         },
@@ -112,7 +118,13 @@ export default function ListScreen() {
               
             } catch (erro) {
               console.error('Erro ao limpar dados:', erro);
-              Alert.alert('Erro', 'Não foi possível limpar os dados');
+              console.error('Código do erro:', (erro as any)?.code);
+              const codigo = (erro as any)?.code;
+              if (codigo === 'permission-denied') {
+                Alert.alert('Erro', 'Permissão negada: verifique as regras do Firestore para a coleção "usuarios"');
+              } else {
+                Alert.alert('Erro', 'Não foi possível limpar os dados');
+              }
             }
           },
         },

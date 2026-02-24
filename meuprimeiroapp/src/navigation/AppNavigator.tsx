@@ -6,7 +6,6 @@ import Header from '../screens/Header';
 import React, { useEffect, useState, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import RegisterScreen from '../screens/RegisterScreen';
-import UserListScreen from '../screens/UserListScreen';
 import LoginScreen from '../screens/LoginScreen';
 import AddContactScreen from '../screens/AddContactScreen';
 import EditContactScreen from '../screens/EditContactScreen';
@@ -123,15 +122,7 @@ export default function AppNavigator() {
         {user ? (
           // Telas para usuários autenticados
           <>
-            <Stack.Screen
-              name="UserList"
-              component={UserListScreen}
-              options={{
-                title: 'Lista de Usuários',
-                headerShown: false,
-                headerLeft: () => null,
-              }}
-            />
+            {/* UserList removido da navegação conforme solicitado */}
 
             <Stack.Screen
               name="ContactList"

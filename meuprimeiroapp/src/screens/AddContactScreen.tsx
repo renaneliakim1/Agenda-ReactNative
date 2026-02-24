@@ -104,23 +104,25 @@ export default function AddContactScreen({ navigation }: Props) {
 			
 			console.log('✅ Contato salvo com sucesso! ID:', docRef.id);
 
-			Alert.alert(
-				'Sucesso!',
-				'Contato adicionado com sucesso!',
-				[
-					{
-						text: 'OK',
-						onPress: () => {
-							console.log('Limpando formulário...');
-							// Limpar formulário
-							setNome('');
-							setEmail('');
-							setIdade('');
-							setTelefone('');
-						},
-					},
-				]
-			);
+						Alert.alert(
+							'Sucesso!',
+							'Contato adicionado com sucesso!',
+							[
+								{
+									text: 'OK',
+									onPress: () => {
+										console.log('Limpando formulário e retornando para lista...');
+										// Limpar formulário
+										setNome('');
+										setEmail('');
+										setIdade('');
+										setTelefone('');
+										// Navegar para a lista de contatos
+										navigation.navigate('ContactList');
+									},
+								},
+							]
+						);
 
 		} catch (error: any) {
 			console.error('❌ ERRO AO ADICIONAR CONTATO:', error);
