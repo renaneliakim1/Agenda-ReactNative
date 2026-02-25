@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import {
-	View,
-	Text,
-	StyleSheet,
-	FlatList,
-	TouchableOpacity,
-	Alert,
-	SafeAreaView,
-	ActivityIndicator,
-	useWindowDimensions,
-	Platform,
+ 	View,
+ 	Text,
+ 	StyleSheet,
+ 	FlatList,
+ 	TouchableOpacity,
+ 	Alert,
+ 	SafeAreaView,
+ 	ActivityIndicator,
+ 	useWindowDimensions,
+ 	Platform,
 } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { auth, db } from '../config/firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,6 +36,14 @@ interface Contact {
 }
 
 export default function ContactListScreen({ navigation }: Props) {
+	const { theme } = useTheme();
+	const iconColor = Colors[theme].icon;
+	const textColor = Colors[theme].text;
+	const subtitleColor = Colors[theme].icon;
+	const cardBg = theme === 'light' ? '#FFFFFF' : Colors.dark.background;
+	const fabBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
+	const fabIconColor = '#FFFFFF';
+
 	const [contatos, setContatos] = useState<Contact[]>([]);
 	const [loading, setLoading] = useState(true);
 
@@ -157,7 +168,7 @@ export default function ContactListScreen({ navigation }: Props) {
 	};
 
 	const renderContact = ({ item }: { item: Contact }) => (
-		<View style={styles.contactCard}>
+		<View style={[styles.contactCard, { backgroundColor: cardBg }]}> 
 			<View style={styles.contactHeader}>
 				<View style={styles.avatar}>
 					<Text style={styles.avatarText}>
@@ -165,16 +176,16 @@ export default function ContactListScreen({ navigation }: Props) {
 					</Text>
 				</View>
 				<View style={styles.contactInfo}>
-					<Text style={styles.contactName}>{item.nome}</Text>
-					<Text style={styles.contactDetail}>
-						<MaterialCommunityIcons name="email" size={14} color="#6B7280" /> {item.email}
-					</Text>
-					<Text style={styles.contactDetail}>
-						<MaterialCommunityIcons name="phone" size={14} color="#6B7280" /> {item.telefone}
-					</Text>
-					<Text style={styles.contactDetail}>
-						<MaterialCommunityIcons name="cake-variant" size={14} color="#6B7280" /> {item.idade} anos
-					</Text>
+						<Text style={[styles.contactName, { color: textColor }]}>{item.nome}</Text>
+						<Text style={[styles.contactDetail, { color: subtitleColor }] }>
+							<MaterialCommunityIcons name="email" size={14} color={iconColor} /> {item.email}
+						</Text>
+						<Text style={[styles.contactDetail, { color: subtitleColor }]}>
+							<MaterialCommunityIcons name="phone" size={14} color={iconColor} /> {item.telefone}
+						</Text>
+						<Text style={[styles.contactDetail, { color: subtitleColor }]}>
+							<MaterialCommunityIcons name="cake-variant" size={14} color={iconColor} /> {item.idade} anos
+						</Text>
 				</View>
 			</View>
 			<TouchableOpacity
@@ -188,24 +199,24 @@ export default function ContactListScreen({ navigation }: Props) {
 
 	if (loading) {
 		return (
-			<SafeAreaView style={styles.safeArea}>
+			<ThemedView style={styles.safeArea}>
 				<View style={styles.loadingContainer}>
-					<ActivityIndicator size="large" color="#6366F1" />
-					<Text style={styles.loadingText}>Carregando contatos...</Text>
+					<ActivityIndicator size="large" color={Colors[theme].tint} />
+					<Text style={[styles.loadingText, { color: textColor }]}>Carregando contatos...</Text>
 				</View>
-			</SafeAreaView>
+			</ThemedView>
 		);
 	}
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
-			<View style={styles.container}>
-				<View style={styles.header}>
+		<ThemedView style={styles.safeArea}>
+			<ThemedView style={styles.container}>
+				<View style={[styles.header, { backgroundColor: Colors[theme].background, borderBottomColor: Colors[theme].icon }]}>
 					<View>
-						<Text style={styles.title}>Meus Contatos</Text>
-						<Text style={styles.subtitle}>
-							{contatos.length} {contatos.length === 1 ? 'contato' : 'contatos'}
-						</Text>
+								<Text style={[styles.title, { color: textColor }]}>Meus Contatos</Text>
+								<Text style={[styles.subtitle, { color: subtitleColor }]}>
+									{contatos.length} {contatos.length === 1 ? 'contato' : 'contatos'}
+								</Text>
 					</View>
 					{/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
 						<MaterialCommunityIcons name="logout" size={24} color="#EF4444" />
@@ -214,9 +225,9 @@ export default function ContactListScreen({ navigation }: Props) {
 
 				{contatos.length === 0 ? (
 					<View style={styles.emptyContainer}>
-						<MaterialCommunityIcons name="account-off" size={80} color="#D1D5DB" />
-						<Text style={styles.emptyTitle}>Nenhum contato ainda</Text>
-						<Text style={styles.emptySubtitle}>
+						<MaterialCommunityIcons name="account-off" size={80} color={iconColor} />
+						<Text style={[styles.emptyTitle, { color: textColor }]}>Nenhum contato ainda</Text>
+						<Text style={[styles.emptySubtitle, { color: subtitleColor }]}>
 							Adicione seu primeiro contato para começar
 						</Text>
 					</View>
@@ -231,24 +242,22 @@ export default function ContactListScreen({ navigation }: Props) {
 				)}
 
 				<TouchableOpacity
-					style={[styles.fab, isMobile && styles.fabMobile]}
+					style={[styles.fab, isMobile && styles.fabMobile, { backgroundColor: fabBg, shadowColor: fabBg }]}
 					onPress={() => navigation.navigate('AddContact')}
 				>
-					<MaterialCommunityIcons name="plus" size={28} color="#FFFFFF" />
+					<MaterialCommunityIcons name="plus" size={28} color={fabIconColor} />
 				</TouchableOpacity>
-			</View>
-		</SafeAreaView>
+			</ThemedView>
+		</ThemedView>
 	);
 }
 
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
 	},
 	container: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
 	},
 	header: {
 		flexDirection: 'row',

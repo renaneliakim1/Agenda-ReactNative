@@ -3,6 +3,7 @@ import { LogBox } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { app, db, auth } from './src/config/firebaseConfig';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import { ThemeProvider } from './src/context/ThemeContext';
 
 console.log('Firebase connectado:', app.name);
 console.log('Firestore instância:', db ? 'Disponível' : 'Indisponível');
@@ -20,18 +21,28 @@ if (typeof globalThis !== 'undefined' && (globalThis as any).ErrorUtils && (glob
 }
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('error', (e: any) => {
-    console.error('window.error captured:', e.error || e.message, e);
-  });
-  window.addEventListener('unhandledrejection', (e: any) => {
-    console.error('unhandledrejection:', e.reason || e);
-  });
+  if (typeof (window as any).addEventListener === 'function') {
+    try {
+      window.addEventListener('error', (e: any) => {
+        console.error('window.error captured:', e.error || e.message, e);
+      });
+      window.addEventListener('unhandledrejection', (e: any) => {
+        console.error('unhandledrejection:', e.reason || e);
+      });
+    } catch (err) {
+      console.warn('Browser hooks addEventListener failed:', err);
+    }
+  } else {
+    console.warn('window.addEventListener is not available in this environment');
+  }
 }
 
 export default function App() {
   return (
     <ErrorBoundary>
-      <AppNavigator />
+      <ThemeProvider>
+        <AppNavigator />
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

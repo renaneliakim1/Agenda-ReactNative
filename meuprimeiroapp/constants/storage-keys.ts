@@ -6,6 +6,7 @@
 export const STORAGE_KEYS = {
   USERS: '@meuprimeiroapp:users',
   USER_PREFIX: '@meuprimeiroapp:user:',
+  THEME: '@meuprimeiroapp:theme',
 } as const;
 
 // Função auxiliar para gerar chave de usuário individual

@@ -12,6 +12,7 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -192,7 +193,7 @@ export default function RegisterScreen({ navigation }: Props) {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<ThemedView style={styles.safeArea}>
 			<KeyboardAvoidingView 
 				style={styles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -314,7 +315,7 @@ export default function RegisterScreen({ navigation }: Props) {
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-		</SafeAreaView>
+		</ThemedView>
 	);
 }
 

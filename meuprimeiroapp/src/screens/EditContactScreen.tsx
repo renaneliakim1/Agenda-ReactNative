@@ -12,6 +12,7 @@ import {
 	Platform,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { ThemedView } from '../../components/themed-view';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -102,7 +103,7 @@ export default function EditContactScreen({ navigation, route }: Props) {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<ThemedView style={styles.safeArea}>
 			<KeyboardAvoidingView 
 				style={styles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -193,18 +194,16 @@ export default function EditContactScreen({ navigation, route }: Props) {
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-		</SafeAreaView>
+		</ThemedView>
 	);
 }
 
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
 	},
 	container: {
 		flex: 1,
-		backgroundColor: '#F9FAFB',
 	},
 	scrollContent: {
 		flexGrow: 1,

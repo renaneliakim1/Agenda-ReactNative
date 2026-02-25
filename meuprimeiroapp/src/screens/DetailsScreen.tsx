@@ -1,4 +1,5 @@
 import  { View, Text, Button , StyleSheet } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { useEffect } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -13,14 +14,14 @@ export default function DetailsScreen({ navigation }: { navigation: any }) {
     }, []);
 
     return (
-        <View style={styles.container}>
+        <ThemedView style={styles.container}>
             <Text style={styles.title}>Tela de Detalhes</Text>
             <Text style={styles.text}>Aqui estão mais informações sobre o aplicativo.</Text>
             <Button
                 title="Voltar para Início"
                 onPress={() => navigation.navigate('Home')}
             />
-        </View>
+        </ThemedView>
     );
 }
 
@@ -30,7 +31,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#fff',
     },
     title: {
         fontSize: 24,

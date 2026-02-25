@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 
 const BREAKPOINT = 768;
 
@@ -18,9 +20,14 @@ const Header: React.FC = () => {
   const { width } = useWindowDimensions();
   const isMobile = width < BREAKPOINT;
   const navigation = useNavigation<any>();
+  const { theme, toggleTheme } = useTheme();
+  const backgroundColor = Colors[theme].background;
+  const borderColor = Colors[theme].icon;
+  const iconColor = Colors[theme].tint;
+  const textColor = Colors[theme].text;
   // menu base
   const itemsBase = [
-    { key: 'home', label: 'Início', icon: 'home' },
+    { key: 'home', label: 'Contatos', icon: 'account-group' },
     { key: 'profile', label: 'Perfil', icon: 'account' },
   ];
 
@@ -61,7 +68,13 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <SafeAreaView style={[styles.container, isMobile ? styles.bottom : styles.top]}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          isMobile ? styles.bottom : styles.top,
+          { backgroundColor, borderBottomColor: borderColor, borderTopColor: borderColor },
+        ]}
+      >
         <View style={[styles.menu, isMobile ? styles.menuMobile : styles.menuDesktop]}>
           {items.map((item) => (
             <TouchableOpacity
@@ -72,14 +85,26 @@ const Header: React.FC = () => {
             >
               {isMobile ? (
                 <View style={styles.mobileItemInner}>
-                  <MaterialCommunityIcons name={item.icon} size={28} color="#6366F1" />
-                  <Text style={styles.mobileLabel}>{item.label}</Text>
+                  <MaterialCommunityIcons name={item.icon} size={28} color={iconColor} />
+                  <Text style={[styles.mobileLabel, { color: textColor }]}>{item.label}</Text>
                 </View>
               ) : (
-                <Text style={styles.text}>{item.label}</Text>
+                <Text style={[styles.text, { color: textColor }]}>{item.label}</Text>
               )}
             </TouchableOpacity>
           ))}
+          {/* botão de alternar tema (visível em mobile e desktop) */}
+          <TouchableOpacity
+            onPress={() => toggleTheme()}
+            style={[styles.themeButton, !isMobile && styles.themeButtonDesktop]}
+            accessibilityLabel="Alternar tema"
+          >
+            <MaterialCommunityIcons
+              name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
+              size={22}
+              color={iconColor}
+            />
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
 
@@ -142,6 +167,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: '#444',
     marginTop: 2,
+  },
+  themeButton: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    padding: 8,
+    borderRadius: 8,
+  },
+  themeButtonDesktop: {
+    right: 12,
+    top: 12,
   },
   text: {
     fontSize: 16,

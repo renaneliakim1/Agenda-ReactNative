@@ -12,6 +12,7 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
@@ -142,7 +143,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<ThemedView style={styles.safeArea}>
 			<KeyboardAvoidingView 
 				style={styles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -206,18 +207,16 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-		</SafeAreaView>
+		</ThemedView>
 	);
 }
 
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F4F4F5',
 	},
 	container: {
 		flex: 1,
-		backgroundColor: '#FFF',
 	},
 	scrollContent: {
 		flexGrow: 1,

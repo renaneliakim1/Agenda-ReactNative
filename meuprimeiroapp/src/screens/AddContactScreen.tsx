@@ -7,13 +7,15 @@ import {
 	TouchableOpacity,
 	Alert,
 	ActivityIndicator,
-	SafeAreaView,
 	ScrollView,
 	KeyboardAvoidingView,
 	Platform,
 	Modal,
 	Pressable,
 } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebaseConfig';
@@ -27,6 +29,14 @@ type Props = {
 };
 
 export default function AddContactScreen({ navigation }: Props) {
+	const { theme } = useTheme();
+	const textColor = Colors[theme].text;
+	const subtitleColor = Colors[theme].icon;
+	const inputBg = theme === 'light' ? '#FFFFFF' : '#0f1415';
+	const borderColor = Colors[theme].icon;
+	const modalBg = theme === 'light' ? '#fff' : '#0f1415';
+	const buttonBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
+	const buttonTextColor = '#fff';
 	const [nome, setNome] = useState('');
 	const [email, setEmail] = useState('');
 	const [idade, setIdade] = useState('');
@@ -148,9 +158,9 @@ export default function AddContactScreen({ navigation }: Props) {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }] }>
 			<KeyboardAvoidingView 
-				style={styles.container}
+				style={[styles.container, { backgroundColor: Colors[theme].background }]}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
@@ -159,29 +169,29 @@ export default function AddContactScreen({ navigation }: Props) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-						<MaterialCommunityIcons name="account-plus" size={56} color="#6366F1" />
-						<Text style={styles.title}>Novo Contato</Text>
-						<Text style={styles.subtitle}>Adicione um contato à sua agenda</Text>
+						<MaterialCommunityIcons name="account-plus" size={56} color={Colors[theme].tint} />
+						<Text style={[styles.title, { color: textColor }]}>Novo Contato</Text>
+						<Text style={[styles.subtitle, { color: subtitleColor }]}>Adicione um contato à sua agenda</Text>
 					</View>
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Nome Completo</Text>
+							<Text style={[styles.label, { color: textColor }]}>Nome Completo</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor }]}
 								placeholder="Nome do contato"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={theme === 'light' ? '#9CA3AF' : '#9CA3AF'}
 								value={nome}
 								onChangeText={setNome}
 							/>
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Email</Text>
+							<Text style={[styles.label, { color: textColor }]}>Email</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor }]}
 								placeholder="email@exemplo.com"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={theme === 'light' ? '#9CA3AF' : '#9CA3AF'}
 								keyboardType="email-address"
 								autoCapitalize="none"
 								value={email}
@@ -190,38 +200,43 @@ export default function AddContactScreen({ navigation }: Props) {
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Idade</Text>
+							<Text style={[styles.label, { color: textColor }]}>Idade</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor }]}
 								placeholder="Idade"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={theme === 'light' ? '#9CA3AF' : '#9CA3AF'}
 								keyboardType="numeric"
 								value={idade}
-								onChangeText={setIdade}
+								onChangeText={(text) => {
+									const cleaned = text.replace(/\D/g, '');
+									setIdade(cleaned.slice(0, 3));
+								}}
+								maxLength={3}
 							/>
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Telefone</Text>
+							<Text style={[styles.label, { color: textColor }]}>Telefone</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor }]}
 								placeholder="(00) 00000-0000"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={theme === 'light' ? '#9CA3AF' : '#9CA3AF'}
 								keyboardType="phone-pad"
 								value={telefone}
-								onChangeText={setTelefone}
+								onChangeText={(text) => setTelefone(text.replace(/\D/g, '').slice(0, 11))}
+								maxLength={11}
 							/>
 						</View>
 
 						<TouchableOpacity
-							style={[styles.button, loading && styles.buttonDisabled]}
+							style={[styles.button, loading && styles.buttonDisabled, { backgroundColor: buttonBg, shadowColor: buttonBg }]}
 							onPress={handleAddContact}
 							disabled={loading}
 						>
 							{loading ? (
-								<ActivityIndicator color="#fff" />
+								<ActivityIndicator color={buttonTextColor} />
 							) : (
-								<Text style={styles.buttonText}>Adicionar Contato</Text>
+								<Text style={[styles.buttonText, { color: buttonTextColor }]}>{'Adicionar Contato'}</Text>
 							)}
 						</TouchableOpacity>
 
@@ -233,11 +248,11 @@ export default function AddContactScreen({ navigation }: Props) {
 							onRequestClose={() => setErrorModalVisible(false)}
 						>
 							<View style={modalStyles.overlay}>
-								<View style={modalStyles.modal}>
-									<Text style={modalStyles.modalTitle}>{errorTitle}</Text>
-									<Text style={modalStyles.modalMessage}>{errorMessageDetails}</Text>
+								<View style={[modalStyles.modal, { backgroundColor: modalBg }] }>
+									<Text style={[modalStyles.modalTitle, { color: textColor }]}>{errorTitle}</Text>
+									<Text style={[modalStyles.modalMessage, { color: subtitleColor }]}>{errorMessageDetails}</Text>
 									<Pressable
-										style={modalStyles.modalButton}
+										style={[modalStyles.modalButton, { backgroundColor: Colors[theme].tint }]}
 										onPress={() => setErrorModalVisible(false)}
 									>
 										<Text style={modalStyles.modalButtonText}>Fechar</Text>
@@ -247,15 +262,15 @@ export default function AddContactScreen({ navigation }: Props) {
 						</Modal>
 
 						<TouchableOpacity
-							style={styles.secondaryButton}
+							style={[styles.secondaryButton, { backgroundColor: Colors[theme].background, borderColor: Colors[theme].tint }]}
 							onPress={() => navigation.navigate('ContactList')}
 						>
-							<Text style={styles.secondaryButtonText}>Ver Meus Contatos</Text>
+							<Text style={[styles.secondaryButtonText, { color: Colors[theme].tint }]}>Ver Meus Contatos</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-		</SafeAreaView>
+		</ThemedView>
 	);
 }
 

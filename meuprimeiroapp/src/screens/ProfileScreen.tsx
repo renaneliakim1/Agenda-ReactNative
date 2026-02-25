@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Button, Alert, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { db, auth } from '../config/firebaseConfig';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { signOut } from 'firebase/auth';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { deleteUser, signOut } from 'firebase/auth';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+  const textColor = Colors[theme].text;
+  const labelColor = Colors[theme].icon;
+  const cardBg = theme === 'light' ? '#fff' : '#0f1415';
+  const loaderColor = Colors[theme].tint;
   const [userData, setUserData] = useState<any | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [nome, setNome] = useState('');
-  const [telefone, setTelefone] = useState('');
-  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -19,7 +24,6 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) {
-          console.log('Usuário não autenticado');
           if (mounted) setLoading(false);
           return;
         }
@@ -28,14 +32,9 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
         const snap = await getDoc(userRef);
 
         if (snap.exists()) {
-          const data = snap.data();
-          if (mounted) {
-            setUserData(data);
-            setNome(data?.nome || '');
-            setTelefone(data?.telefone || '');
-          }
+          if (mounted) setUserData(snap.data());
         } else {
-          console.log('Documento do usuário não encontrado em users/');
+          if (mounted) setUserData(null);
         }
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
@@ -45,73 +44,147 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     };
 
     loadUser();
-
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Erro ao sair:', error);
-      Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
-    }
-  };
-
-  const handleStartEdit = () => {
-    setEditing(true);
-  };
-
-  const handleCancel = () => {
-    setEditing(false);
-    // reset fields to current data
-    setNome(userData?.nome || '');
-    setTelefone(userData?.telefone || '');
-  };
-
-  const handleSave = async () => {
+  const handleDeleteAccount = () => {
+    console.log('[Profile] handleDeleteAccount pressed');
     const currentUser = auth.currentUser;
+
     if (!currentUser) {
-      Alert.alert('Erro', 'Usuário não autenticado');
+      console.log('[Profile] Nenhum usuário autenticado');
+      if (Platform.OS === 'web') window.alert('Erro: Nenhum usuário autenticado');
+      else Alert.alert('Erro', 'Nenhum usuário autenticado');
       return;
     }
-    // debug: log payload and uid
-    console.log('[Profile] handleSave payload', { uid: currentUser.uid, nome, telefone });
 
-    setSaving(true);
+    // Fallback para web: usar window.confirm (Alert.alert pode não aparecer em alguns casos)
+    if (Platform.OS === 'web') {
+      const ok = window.confirm('Apagar conta\n\nTem certeza que deseja apagar sua conta? Esta ação é irreversível.');
+      console.log('[Profile] web confirm result=', ok);
+      if (ok) performDelete();
+      return;
+    }
+
+    Alert.alert(
+      'Apagar conta',
+      'Tem certeza que deseja apagar sua conta? Esta ação é irreversível.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Apagar', style: 'destructive', onPress: performDelete },
+      ],
+    );
+  };
+
+  const performDelete = async () => {
+    const currentUser = auth.currentUser;
+
+    if (!currentUser) {
+      Alert.alert('Erro', 'Nenhum usuário autenticado');
+      return;
+    }
+
+    console.log('[Profile] Iniciando exclusão do usuário:', currentUser.uid);
+    setDeleting(true);
+
+    // tentar dar reload no usuário para garantir estado atualizado
+    try {
+      if (typeof (currentUser as any).reload === 'function') {
+        // @ts-ignore
+        await currentUser.reload();
+        console.log('[Profile] reload executado com sucesso');
+      }
+    } catch (reloadErr) {
+      console.warn('[Profile] reload falhou (não bloqueante):', reloadErr);
+    }
+
+    // 🔥 1) Deletar documento do Firestore primeiro (permite usar credenciais atuais)
     try {
       const userRef = doc(db, 'users', currentUser.uid);
-      // use setDoc with merge to create/update the document and add timestamp
-      const payload = {
-        nome: nome || '',
-        telefone: telefone || '',
-        updatedAt: serverTimestamp(),
-      };
+      await deleteDoc(userRef);
+      console.log('[Profile] Documento removido do Firestore');
+    } catch (firestoreErr) {
+      console.warn('[Profile] Erro ao apagar documento do Firestore:', firestoreErr);
+      Alert.alert('Erro', `Falha ao apagar dados do usuário: ${String(firestoreErr)}`);
+      setDeleting(false);
+      return;
+    }
 
-      console.log('[Profile] Salvando payload:', payload, 'uid:', currentUser.uid);
-      await setDoc(userRef, payload, { merge: true });
+    // 🔐 2) Agora deletar usuário do Firebase Auth
+    try {
+      console.log('[Profile] Chamando deleteUser para', currentUser.uid);
+      await deleteUser(currentUser);
+      console.log('[Profile] Usuário removido do Auth');
+      setDeleting(false);
+      Alert.alert('Sucesso', 'Conta apagada com sucesso.');
 
-      // refresh local state
-      setUserData((prev: any) => ({ ...prev, nome, telefone, updatedAt: new Date().toISOString() }));
-      setEditing(false);
+      // garantir signOut local e redirecionamento
+      try {
+        console.log('[Profile] Forçando signOut local após deleteUser');
+        await signOut(auth);
+        console.log('[Profile] signOut executado');
+      } catch (signErr) {
+        console.warn('[Profile] signOut pós-delete falhou (não crítico):', signErr);
+      }
 
-      console.log('[Profile] Perfil salvo com sucesso', { uid: currentUser.uid });
-      Alert.alert('Sucesso', 'Perfil salvo com sucesso.');
-    } catch (error: any) {
-      const message = error?.message || JSON.stringify(error) || String(error);
-      console.error('[Profile] Erro ao salvar perfil:', error);
-      Alert.alert('Erro ao salvar', message);
-    } finally {
-      setSaving(false);
+      try {
+        navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+        console.log('[Profile] navigation.reset para Login chamado');
+      } catch (navErr) {
+        console.warn('[Profile] navigation.reset falhou:', navErr);
+      }
+
+      // fallback: navegar explicitamente após um pequeno delay
+      setTimeout(() => {
+        try {
+          navigation.navigate('Login');
+          console.log('[Profile] navigation.navigate para Login (fallback) chamado');
+        } catch (navErr) {
+          console.warn('[Profile] navigation.navigate falhou:', navErr);
+        }
+      }, 150);
+
+      return;
+    } catch (authErr: any) {
+      console.warn('[Profile] Erro ao deletar usuário do Auth:', authErr);
+      if (authErr?.code === 'auth/requires-recent-login') {
+        Alert.alert(
+          'Reautenticação necessária',
+          'Para apagar a conta é necessário entrar novamente. Deseja sair e efetuar o login novamente?',
+          [
+            { text: 'Cancelar', style: 'cancel', onPress: () => setDeleting(false) },
+            {
+              text: 'Sair',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await signOut(auth);
+                } catch (signErr) {
+                  console.warn('[Profile] Erro ao deslogar após requerer reautenticação:', signErr);
+                  Alert.alert('Erro ao deslogar', String(signErr));
+                } finally {
+                  setDeleting(false);
+                  navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+                }
+              },
+            },
+          ],
+        );
+      } else {
+        Alert.alert('Erro', `Não foi possível apagar o usuário do Auth: ${authErr?.code || ''} ${authErr?.message || String(authErr)}`);
+        setDeleting(false);
+      }
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#6366F1" />
-        <Text style={styles.loadingText}>Carregando perfil...</Text>
-      </View>
+      <ThemedView style={styles.container}>
+        <ActivityIndicator size="large" color={loaderColor} />
+        <Text style={[styles.loadingText, { color: labelColor }]}>Carregando perfil...</Text>
+      </ThemedView>
     );
   }
 
@@ -119,63 +192,30 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
   const displayEmail = userData?.email || auth.currentUser?.email || 'Sem email';
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.label}>Nome</Text>
-        <Text style={styles.value}>{displayName}</Text>
+    <ThemedView style={styles.container}>
+      <View style={[styles.card, { backgroundColor: cardBg }]}>
+        <Text style={[styles.label, { color: labelColor }]}>Nome</Text>
+        <Text style={[styles.value, { color: textColor }]}>{displayName}</Text>
 
-        <Text style={styles.label}>E-mail</Text>
-        <Text style={styles.value}>{displayEmail}</Text>
+        <Text style={[styles.label, { color: labelColor }]}>E-mail</Text>
+        <Text style={[styles.value, { color: textColor }]}>{displayEmail}</Text>
 
-        <Text style={styles.label}>Telefone</Text>
-        <Text style={styles.value}>{userData?.telefone || 'Sem telefone'}</Text>
+        <Text style={[styles.label, { color: labelColor }]}>Telefone</Text>
+        <Text style={[styles.value, { color: textColor }]}>{userData?.telefone || 'Sem telefone'}</Text>
       </View>
 
-      <View style={{ marginTop: 20, width: '100%' }} />
+      <View style={{ height: 16 }} />
 
-      {editing ? (
-        <View style={{ width: '100%' }}>
-          <Text style={styles.label}>Nome</Text>
-          <TextInput
-            style={styles.input}
-            value={nome}
-            onChangeText={setNome}
-            placeholder="Nome"
-            placeholderTextColor="#999"
-          />
-
-          <Text style={styles.label}>Telefone</Text>
-          <TextInput
-            style={styles.input}
-            value={telefone}
-            onChangeText={setTelefone}
-            placeholder="Telefone"
-            placeholderTextColor="#999"
-            keyboardType="phone-pad"
-          />
-
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving}>
-              <Text style={styles.saveButtonText}>{saving ? 'Salvando...' : 'Salvar'}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} disabled={saving}>
-              <Text style={styles.cancelButtonText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        <>
-          <TouchableOpacity style={styles.editButton} onPress={handleStartEdit}>
-            <Text style={styles.editButtonText}>Editar Perfil</Text>
-          </TouchableOpacity>
-
-          <View style={{ height: 10 }} />
-
-          <Button title="Sair" color="#EF4444" onPress={handleLogout} />
-        </>
-      )}
-    </View>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={handleDeleteAccount}
+        disabled={deleting}
+      >
+        <Text style={styles.deleteButtonText}>
+          {deleting ? 'Apagando...' : 'Apagar conta'}
+        </Text>
+      </TouchableOpacity>
+    </ThemedView>
   );
 }
 
@@ -183,7 +223,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -212,54 +251,21 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: '#666',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: '#111827',
-    backgroundColor: '#fff',
-    marginTop: 6,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: '#6366F1',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: '#E5E7EB',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: '#374151',
-    fontWeight: '700',
-  },
-  editButton: {
+  deleteButton: {
     width: '100%',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#EF4444',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
-  editButtonText: {
+  deleteButtonText: {
     color: '#fff',
     fontWeight: '700',
   },
 });
+
+
+
+
+
+

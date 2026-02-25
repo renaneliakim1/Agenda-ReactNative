@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-	View,
-	Text,
-	TextInput,
-	StyleSheet,
-	TouchableOpacity,
-	Alert,
-	ActivityIndicator,
-	SafeAreaView,
-	ScrollView,
-	KeyboardAvoidingView,
-	Platform,
-	BackHandler,
+ 	View,
+ 	Text,
+ 	TextInput,
+ 	StyleSheet,
+ 	TouchableOpacity,
+ 	Alert,
+ 	ActivityIndicator,
+ 	SafeAreaView,
+ 	ScrollView,
+ 	KeyboardAvoidingView,
+ 	Platform,
+ 	BackHandler,
 } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
@@ -155,7 +156,7 @@ export default function LoginScreen({ navigation }: any) {
 	};
 
 	return (
-		<SafeAreaView style={styles.safeArea}>
+		<ThemedView style={styles.safeArea}>
 			<KeyboardAvoidingView 
 				style={styles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -212,7 +213,7 @@ export default function LoginScreen({ navigation }: any) {
 									onPress={() => setMostrarSenha(!mostrarSenha)}
 								>
 									<MaterialCommunityIcons
-										name={mostrarSenha ? 'eye-off' : 'eye'}
+										name={mostrarSenha ? 'eye' : 'eye-off'}
 										size={24}
 										color="#6B7280"
 									/>
@@ -250,18 +251,16 @@ export default function LoginScreen({ navigation }: any) {
 					</View>
 				</ScrollView>
 			</KeyboardAvoidingView>
-		</SafeAreaView>
+		</ThemedView>
 	);
 }
 
 const styles = StyleSheet.create({
 	safeArea: {
 		flex: 1,
-		backgroundColor: '#F4F4F5', // cinza bem claro
 	},
 	container: {
 		flex: 1,
-		backgroundColor: '#FFF', // branco
 	},
 	scrollContent: {
 		flexGrow: 1,

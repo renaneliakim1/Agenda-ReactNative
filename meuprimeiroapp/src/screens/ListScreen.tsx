@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, Alert, TouchableOpacity, ActivityIndicator, } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { collection, getDocs, deleteDoc, doc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { useNavigation } from '@react-navigation/native';
@@ -157,10 +158,10 @@ export default function ListScreen() {
 
   if (carregando) {
     return (
-      <View style={styles.container}>
+      <ThemedView style={styles.container}>
         <Text style={styles.titulo}>Carregando...</Text>
         <ActivityIndicator size="large" color="#2c82c9" />
-      </View>
+      </ThemedView>
     );
   }
 
@@ -168,7 +169,7 @@ export default function ListScreen() {
   const mostrarBotaoLimpar = usuarios.length > 0;
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <Text style={styles.titulo}>Usuários Cadastrados</Text>
       <Text style={styles.contador}>{usuarios.length} cadastro(s)</Text>
 
@@ -209,7 +210,7 @@ export default function ListScreen() {
           <Text style={styles.botaoTexto}>VOLTAR</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
@@ -217,7 +218,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   titulo: {
     fontSize: 28,

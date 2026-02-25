@@ -97,8 +97,8 @@ export default function AppNavigator() {
 
   console.log('🎯 Renderizando navegação. Usuário:', user ? 'Autenticado' : 'Não autenticado');
 
-  // Oculta o Header apenas nas rotas de Login e Register
-  const shouldShowHeader = !(currentRoute === 'Login' || currentRoute === 'Register');
+  // Oculta o Header apenas nas rotas de Login, Register e ForgotPassword
+  const shouldShowHeader = !(currentRoute === 'Login' || currentRoute === 'Register' || currentRoute === 'ForgotPassword');
 
   return (
     <NavigationContainer

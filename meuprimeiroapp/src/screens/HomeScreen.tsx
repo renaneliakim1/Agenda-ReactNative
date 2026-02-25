@@ -1,4 +1,5 @@
 import { View, Text, Button, StyleSheet } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { useEffect } from 'react';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -19,7 +20,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
   }, []);
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <Text style={styles.title}>Bem Vindo ao Meu Primeiro App</Text>
 
       <Text style = { styles.text }> Escolha uma opção abaixo: </Text>
@@ -49,7 +50,7 @@ export default function HomeScreen({ navigation }: { navigation: HomeScreenNavig
           title="Ver Perfil"
           onPress={() => navigation.navigate('Profile')}
         />
-    </View>
+    </ThemedView>
   );
 }
 
@@ -60,7 +61,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
     padding: 20
   },    
     title: {

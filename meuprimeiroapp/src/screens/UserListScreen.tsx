@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import { ThemedView } from '../../components/themed-view';
 import { useState, useEffect } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { auth, db } from '../config/firebaseConfig';
@@ -140,7 +141,7 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <ThemedView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Meus Conatos</Text>
         </View>
@@ -148,12 +149,12 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
           <ActivityIndicator size="large" color="#6366F1" />
           <Text style={styles.loadingText}>Carregando contatos...</Text>
         </View>
-      </View>
+      </ThemedView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ThemedView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Meus Contatos</Text>
         <Text style={styles.subtitle}>Total: {contacts.length}</Text>
@@ -219,14 +220,13 @@ export default function UserListScreen({ navigation }: { navigation: any }) {
           </TouchableOpacity>
         </>
       )}
-    </View>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
     backgroundColor: '#234ce1',
