@@ -169,7 +169,7 @@ export default function AddContactScreen({ navigation }: Props) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-						<MaterialCommunityIcons name="account-plus" size={56} color={Colors[theme].tint} />
+						<MaterialCommunityIcons name="account-plus" size={56} color={Colors[theme].text} />
 						<Text style={[styles.title, { color: textColor }]}>Novo Contato</Text>
 						<Text style={[styles.subtitle, { color: subtitleColor }]}>Adicione um contato à sua agenda</Text>
 					</View>
@@ -262,10 +262,10 @@ export default function AddContactScreen({ navigation }: Props) {
 						</Modal>
 
 						<TouchableOpacity
-							style={[styles.secondaryButton, { backgroundColor: Colors[theme].background, borderColor: Colors[theme].tint }]}
+							style={[styles.secondaryButton, { backgroundColor: Colors[theme].background, borderColor: Colors[theme].text }]}
 							onPress={() => navigation.navigate('ContactList')}
 						>
-							<Text style={[styles.secondaryButtonText, { color: Colors[theme].tint }]}>Ver Meus Contatos</Text>
+							<Text style={[styles.secondaryButtonText, { color: Colors[theme].text }]}>Ver Meus Contatos</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>

@@ -8,9 +8,12 @@ import { Platform } from 'react-native';
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+// global text color requested by user: rgb(10,126,164) -> #0a7ea4
+const globalTextColor = '#0a7ea4';
+
 export const Colors = {
   light: {
-    text: '#11181C',
+    text: globalTextColor,
     background: '#fff',
     tint: tintColorLight,
     icon: '#687076',
@@ -18,7 +21,7 @@ export const Colors = {
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: '#ECEDEE',
+    text: globalTextColor,
     background: '#151718',
     tint: tintColorDark,
     icon: '#9BA1A6',

@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../config/firebaseConfig';
@@ -35,6 +37,16 @@ export default function RegisterScreen({ navigation }: Props) {
 		const [loading, setLoading] = useState(false);
 		const [showSenha, setShowSenha] = useState(true);
 		const [showConfirmarSenha, setShowConfirmarSenha] = useState(true);
+
+		const { theme, toggleTheme } = useTheme();
+		const tint = Colors[theme].tint;
+
+		const textColor = Colors[theme].text;
+		const subtitleColor = Colors[theme].icon;
+		const inputBg = theme === 'light' ? '#F8FAFC' : '#0f1415';
+		const inputBorderColor = theme === 'light' ? '#D1D5DB' : Colors[theme].icon;
+		const buttonBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
+		const buttonTextColor = '#fff';
 
 	// Validação de e-mail
 	function isValidEmail(email: string) {
@@ -193,9 +205,9 @@ export default function RegisterScreen({ navigation }: Props) {
 	};
 
 	return (
-		<ThemedView style={styles.safeArea}>
+		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
 			<KeyboardAvoidingView 
-				style={styles.container}
+				style={[styles.container, { backgroundColor: Colors[theme].background }]}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
@@ -204,29 +216,36 @@ export default function RegisterScreen({ navigation }: Props) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-						<MaterialCommunityIcons name="account-plus" size={56} color="#6366F1" />
-						<Text style={styles.title}>Cadastre-se</Text>
-						<Text style={styles.subtitle}>Crie sua conta gratuitamente</Text>
+						<MaterialCommunityIcons name="account-plus" size={56} color={tint} />
+						<Text style={[styles.title, { color: Colors[theme].text }]}>Cadastre-se</Text>
+						<Text style={[styles.subtitle, { color: Colors[theme].icon }]}>Crie sua conta gratuitamente</Text>
+						<TouchableOpacity
+							style={[styles.themeButton, { borderColor: Colors[theme].icon, backgroundColor: Colors[theme].background }]}
+							onPress={toggleTheme}
+							hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+						>
+							<MaterialCommunityIcons name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'} size={20} color={tint} />
+						</TouchableOpacity>
 					</View>
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Nome Completo</Text>
+							<Text style={[styles.label, { color: textColor }]}>Nome Completo</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
 								placeholder="Seu nome completo"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								value={nome}
 								onChangeText={setNome}
 							/>
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Email</Text>
+							<Text style={[styles.label, { color: textColor }]}>Email</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
 								placeholder="seu@email.com"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								keyboardType="email-address"
 								autoCapitalize="none"
 								value={email}
@@ -235,11 +254,11 @@ export default function RegisterScreen({ navigation }: Props) {
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Telefone</Text>
+							<Text style={[styles.label, { color: textColor }]}>Telefone</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
 								placeholder="(00) 00000-0000"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								keyboardType="phone-pad"
 								value={telefone}
 								onChangeText={setTelefone}
@@ -250,9 +269,9 @@ export default function RegisterScreen({ navigation }: Props) {
 							<Text style={styles.label}>Senha</Text>
 							<View style={{ position: 'relative' }}>
 								<TextInput
-									style={styles.input}
+									style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
 									placeholder="Mínimo 6 caracteres"
-									placeholderTextColor="#9CA3AF"
+									placeholderTextColor={subtitleColor}
 									secureTextEntry={showSenha}
 									value={senha}
 									onChangeText={setSenha}
@@ -264,7 +283,7 @@ export default function RegisterScreen({ navigation }: Props) {
 									<MaterialCommunityIcons
 										name={showSenha ? 'eye-off' : 'eye'}
 										size={22}
-										color="#9CA3AF"
+										color={subtitleColor}
 									/>
 								</TouchableOpacity>
 							</View>
@@ -274,9 +293,9 @@ export default function RegisterScreen({ navigation }: Props) {
 							<Text style={styles.label}>Confirmar Senha</Text>
 							<View style={{ position: 'relative' }}>
 								<TextInput
-									style={styles.input}
+									style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
 									placeholder="Digite a senha novamente"
-									placeholderTextColor="#9CA3AF"
+									placeholderTextColor={subtitleColor}
 									secureTextEntry={showConfirmarSenha}
 									value={confirmarSenha}
 									onChangeText={setConfirmarSenha}
@@ -288,21 +307,21 @@ export default function RegisterScreen({ navigation }: Props) {
 									<MaterialCommunityIcons
 										name={showConfirmarSenha ? 'eye-off' : 'eye'}
 										size={22}
-										color="#9CA3AF"
+										color={subtitleColor}
 									/>
 								</TouchableOpacity>
 							</View>
 						</View>
 
 						<TouchableOpacity
-							style={[styles.button, loading && styles.buttonDisabled]}
+							style={[styles.button, loading && styles.buttonDisabled, { backgroundColor: buttonBg }]}
 							onPress={handleRegister}
 							disabled={loading}
 						>
 							{loading ? (
-								<ActivityIndicator color="#fff" />
+								<ActivityIndicator color={buttonTextColor} />
 							) : (
-								<Text style={styles.buttonText}>Criar Conta</Text>
+								<Text style={[styles.buttonText, { color: buttonTextColor }]}>Criar Conta</Text>
 							)}
 						</TouchableOpacity>
 					</View>
@@ -310,7 +329,7 @@ export default function RegisterScreen({ navigation }: Props) {
 					<View style={styles.footer}>
 						<Text style={styles.footerText}>Já tem uma conta?</Text>
 						<TouchableOpacity onPress={() => navigation.navigate('Login')}>
-							<Text style={styles.loginLink}>Faça login aqui</Text>
+							<Text style={[styles.loginLink, { color: Colors[theme].tint }]}>Faça login aqui</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>
@@ -409,5 +428,13 @@ const styles = StyleSheet.create({
 		 color: '#2563EB',
 		 fontWeight: '700',
 		 letterSpacing: 0.3,
+	 },
+	 themeButton: {
+		 position: 'absolute',
+		 right: 12,
+		 top: 8,
+		 padding: 6,
+		 borderRadius: 20,
+		 borderWidth: 1,
 	 },
 });

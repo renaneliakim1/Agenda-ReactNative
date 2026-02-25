@@ -23,7 +23,7 @@ const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const backgroundColor = Colors[theme].background;
   const borderColor = Colors[theme].icon;
-  const iconColor = Colors[theme].tint;
+  const iconColor = Colors[theme].text;
   const textColor = Colors[theme].text;
   // menu base
   const itemsBase = [
@@ -165,7 +165,6 @@ const styles = StyleSheet.create({
   },
   mobileLabel: {
     fontSize: 11,
-    color: '#444',
     marginTop: 2,
   },
   themeButton: {
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    color: '#222',
   },
   icon: {
     fontSize: 22,

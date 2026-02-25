@@ -14,6 +14,8 @@ import {
  	BackHandler,
 } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
@@ -23,6 +25,17 @@ export default function LoginScreen({ navigation }: any) {
 	const [senha, setSenha] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [mostrarSenha, setMostrarSenha] = useState(false);
+	const { theme, toggleTheme } = useTheme();
+
+	const textColor = Colors[theme].text;
+	const subtitleColor = Colors[theme].icon;
+	const inputBg = theme === 'light' ? '#F8FAFC' : '#0f1415';
+	const inputBorderColor = theme === 'light' ? '#D1D5DB' : Colors[theme].icon;
+	const buttonBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
+	const buttonTextColor = '#fff';
+	const infoCardBg = theme === 'light' ? '#F0F4FF' : '#0f1415';
+	const infoCardBorder = theme === 'light' ? '#E0E7FF' : Colors[theme].icon;
+
 
 	useEffect(() => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -167,15 +180,26 @@ export default function LoginScreen({ navigation }: any) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-						<MaterialCommunityIcons name="lock" size={56} color="#6366F1" />
-						<Text style={styles.title}>Login</Text>
-						<Text style={styles.subtitle}>Acesse sua conta</Text>
-					</View>
+							<MaterialCommunityIcons name="lock" size={56} color={Colors[theme].tint} />
+							<Text style={[styles.title, { color: textColor }]}>Login</Text>
+							<Text style={[styles.subtitle, { color: subtitleColor }]}>Acesse sua conta</Text>
+							<TouchableOpacity
+								style={[styles.themeButton, { borderColor: subtitleColor, backgroundColor: Colors[theme].background }]}
+								onPress={toggleTheme}
+								hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+							>
+								<MaterialCommunityIcons
+									name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
+									size={20}
+									color={Colors[theme].tint}
+								/>
+							</TouchableOpacity>
+						</View>
 				<View style={styles.infoContainer}>
-					<View style={styles.infoCard}>
-						<MaterialCommunityIcons name="contacts" size={32} color="#6366F1" style={styles.infoIcon} />
-						<Text style={styles.infoTitle}>Sistema de Gerenciamento de Contatos</Text>
-						<Text style={styles.infoDescription}>
+					<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }]}>
+						<MaterialCommunityIcons name="contacts" size={32} color={Colors[theme].tint} style={styles.infoIcon} />
+						<Text style={[styles.infoTitle, { color: textColor }]}>Sistema de Gerenciamento de Contatos</Text>
+						<Text style={[styles.infoDescription, { color: subtitleColor }] }>
 							Organize e gerencie seus contatos pessoais de forma simples e segura. 
 							Adicione, edite e pesquise contatos com informações como nome, email, 
 							telefone e idade. Todos os seus dados são armazenados de forma 
@@ -185,25 +209,25 @@ export default function LoginScreen({ navigation }: any) {
 				</View>
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Email</Text>
-							<TextInput
-								style={styles.input}
-								placeholder="seu_email@email.com"
-								placeholderTextColor="#9CA3AF"
-								keyboardType="email-address"
-								autoCapitalize="none"
-								value={email}
-								onChangeText={setEmail}
-							/>
-						</View>
+								<Text style={[styles.label, { color: textColor }]}>Email</Text>
+								<TextInput
+									style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
+									placeholder="seu_email@email.com"
+									placeholderTextColor={subtitleColor}
+									keyboardType="email-address"
+									autoCapitalize="none"
+									value={email}
+									onChangeText={setEmail}
+								/>
+							</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Senha</Text>
-							<View style={styles.passwordContainer}>
+							<Text style={[styles.label, { color: textColor }]}>Senha</Text>
+							<View style={[styles.passwordContainer, { backgroundColor: inputBg, borderColor: inputBorderColor }] }>
 								<TextInput
-									style={styles.passwordInput}
+									style={[styles.passwordInput, { color: textColor }]}
 									placeholder="••••••••"
-									placeholderTextColor="#9CA3AF"
+									placeholderTextColor={subtitleColor}
 									secureTextEntry={!mostrarSenha}
 									value={senha}
 									onChangeText={setSenha}
@@ -215,21 +239,21 @@ export default function LoginScreen({ navigation }: any) {
 									<MaterialCommunityIcons
 										name={mostrarSenha ? 'eye' : 'eye-off'}
 										size={24}
-										color="#6B7280"
+										color={subtitleColor}
 									/>
 								</TouchableOpacity>
 							</View>
 						</View>
 
 						<TouchableOpacity
-							style={[styles.button, loading && styles.buttonDisabled]}
+							style={[styles.button, loading && styles.buttonDisabled, { backgroundColor: buttonBg }]}
 							onPress={handleLogin}
 							disabled={loading}
 						>
 							{loading ? (
-								<ActivityIndicator color="#fff" />
+								<ActivityIndicator color={buttonTextColor} />
 							) : (
-								<Text style={styles.buttonText}>Entrar</Text>
+								<Text style={[styles.buttonText, { color: buttonTextColor }]}>Entrar</Text>
 							)}
 						</TouchableOpacity>
 					</View>
@@ -239,13 +263,13 @@ export default function LoginScreen({ navigation }: any) {
 							style={styles.forgotPasswordContainer}
 							onPress={() => navigation.navigate('ForgotPassword')}
 						>
-							<Text style={styles.forgotPasswordLink}>Esqueci minha senha</Text>
+							<Text style={[styles.forgotPasswordLink, { color: Colors[theme].tint }]}>Esqueci minha senha</Text>
 						</TouchableOpacity>
 
 						<View style={styles.registerContainer}>
 							<Text style={styles.footerText}>Não tem conta?</Text>
 							<TouchableOpacity onPress={() => navigation.navigate('Register')}>
-								<Text style={styles.registerLink}>Cadastre-se aqui</Text>
+								<Text style={[styles.registerLink, { color: Colors[theme].tint }]}>Cadastre-se aqui</Text>
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -271,6 +295,15 @@ const styles = StyleSheet.create({
 	headerContainer: {
 		alignItems: 'center',
 		marginBottom: 30,
+		position: 'relative',
+	},
+	themeButton: {
+		position: 'absolute',
+		right: 12,
+		top: 8,
+		padding: 6,
+		borderRadius: 20,
+		borderWidth: 1,
 	},
 	infoContainer: {
 		marginBottom: 30,
@@ -344,6 +377,8 @@ const styles = StyleSheet.create({
 		borderColor: '#D1D5DB',
 		borderRadius: 4,
 		backgroundColor: '#F8FAFC',
+		position: 'relative',
+		paddingRight: 48,
 	},
 	passwordInput: {
 		flex: 1,
@@ -354,8 +389,9 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 	},
 	eyeButton: {
-		paddingHorizontal: 12,
-		paddingVertical: 12,
+		position: 'absolute',
+		right: 16,
+		top: 18,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},

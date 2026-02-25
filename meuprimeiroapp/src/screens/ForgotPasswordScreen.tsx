@@ -14,12 +14,24 @@ import {
 } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 
 export default function ForgotPasswordScreen({ navigation }: any) {
 	const [email, setEmail] = useState('');
 	const [loading, setLoading] = useState(false);
+
+	const { theme, toggleTheme } = useTheme();
+	const textColor = Colors[theme].text;
+	const subtitleColor = Colors[theme].icon;
+	const inputBg = theme === 'light' ? '#F8FAFC' : '#0f1415';
+	const inputBorderColor = theme === 'light' ? '#D1D5DB' : Colors[theme].icon;
+	const buttonBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
+	const buttonTextColor = '#fff';
+	const infoCardBg = theme === 'light' ? '#EFF6FF' : '#0f1415';
+	const infoCardBorder = theme === 'light' ? '#DBEAFE' : Colors[theme].icon;
 
 	const validarEmail = (email: string): boolean => {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -143,9 +155,9 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 	};
 
 	return (
-		<ThemedView style={styles.safeArea}>
+		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
 			<KeyboardAvoidingView 
-				style={styles.container}
+				style={[styles.container, { backgroundColor: Colors[theme].background }]}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
@@ -154,17 +166,24 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-						<MaterialCommunityIcons name="lock-reset" size={56} color="#6366F1" />
-						<Text style={styles.title}>Esqueci Minha Senha</Text>
-						<Text style={styles.subtitle}>
+						<MaterialCommunityIcons name="lock-reset" size={56} color={Colors[theme].tint} />
+						<Text style={[styles.title, { color: textColor }]}>Esqueci Minha Senha</Text>
+						<Text style={[styles.subtitle, { color: subtitleColor }]}>
 							Digite seu email para receber um link de redefinição
 						</Text>
+						<TouchableOpacity
+							style={[styles.themeButton, { borderColor: subtitleColor, backgroundColor: Colors[theme].background }]}
+							onPress={toggleTheme}
+							hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+						>
+							<MaterialCommunityIcons name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'} size={20} color={Colors[theme].tint} />
+						</TouchableOpacity>
 					</View>
 
 					<View style={styles.infoContainer}>
-						<View style={styles.infoCard}>
-							<MaterialCommunityIcons name="information" size={24} color="#2563EB" style={styles.infoIcon} />
-							<Text style={styles.infoText}>
+						<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }] }>
+							<MaterialCommunityIcons name="information" size={24} color={Colors[theme].tint} style={styles.infoIcon} />
+							<Text style={[styles.infoText, { color: Colors[theme].tint }] }>
 								Você receberá um email com instruções para criar uma nova senha.
 								O link expira em 1 hora.
 							</Text>
@@ -173,11 +192,11 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Email</Text>
+							<Text style={[styles.label, { color: textColor }]}>Email</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
 								placeholder="seu@email.com"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								keyboardType="email-address"
 								autoCapitalize="none"
 								value={email}
@@ -186,23 +205,23 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 						</View>
 
 						<TouchableOpacity
-							style={[styles.button, loading && styles.buttonDisabled]}
+							style={[styles.button, loading && styles.buttonDisabled, { backgroundColor: buttonBg }]}
 							onPress={handleResetPassword}
 							disabled={loading}
 						>
 							{loading ? (
-								<ActivityIndicator color="#fff" />
+								<ActivityIndicator color={buttonTextColor} />
 							) : (
-								<Text style={styles.buttonText}>Enviar link de redefinição</Text>
+								<Text style={[styles.buttonText, { color: buttonTextColor }]}>Enviar link de redefinição</Text>
 							)}
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							style={styles.buttonSecondary}
+							style={[styles.buttonSecondary, { borderColor: Colors[theme].tint, backgroundColor: Colors[theme].background }]}
 							onPress={() => navigation.navigate('Login')}
 						>
-							<MaterialCommunityIcons name="arrow-left" size={20} color="#2563EB" />
-							<Text style={styles.buttonSecondaryText}>Voltar para o Login</Text>
+							<MaterialCommunityIcons name="arrow-left" size={20} color={Colors[theme].tint} />
+							<Text style={[styles.buttonSecondaryText, { color: Colors[theme].tint }]}>Voltar para o Login</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>
@@ -227,6 +246,7 @@ const styles = StyleSheet.create({
 	headerContainer: {
 		alignItems: 'center',
 		marginBottom: 30,
+		position: 'relative',
 	},
 	title: {
 		fontSize: 32,
@@ -327,6 +347,14 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '700',
 		letterSpacing: 0.5,
+	},
+	themeButton: {
+		position: 'absolute',
+		right: 12,
+		top: 8,
+		padding: 6,
+		borderRadius: 20,
+		borderWidth: 1,
 	},
 	footer: {
 		alignItems: 'center',
