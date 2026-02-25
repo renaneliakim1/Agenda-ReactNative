@@ -266,10 +266,10 @@ export default function RegisterScreen({ navigation }: Props) {
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Senha</Text>
-							<View style={{ position: 'relative' }}>
+							<Text style={[styles.label, { color: textColor }]}>Senha</Text>
+							<View style={[styles.inputRow, { backgroundColor: inputBg, borderColor: inputBorderColor }]}> 
 								<TextInput
-									style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
+									style={[styles.inputInline, { color: textColor }]}
 									placeholder="Mínimo 6 caracteres"
 									placeholderTextColor={subtitleColor}
 									secureTextEntry={showSenha}
@@ -277,7 +277,7 @@ export default function RegisterScreen({ navigation }: Props) {
 									onChangeText={setSenha}
 								/>
 								<TouchableOpacity
-									style={{ position: 'absolute', right: 16, top: 18 }}
+									style={styles.eyeButton}
 									onPress={() => setShowSenha((prev) => !prev)}
 								>
 									<MaterialCommunityIcons
@@ -290,10 +290,10 @@ export default function RegisterScreen({ navigation }: Props) {
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Confirmar Senha</Text>
-							<View style={{ position: 'relative' }}>
+							<Text style={[styles.label, { color: textColor }]}>Confirmar Senha</Text>
+							<View style={[styles.inputRow, { backgroundColor: inputBg, borderColor: inputBorderColor }]}> 
 								<TextInput
-									style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
+									style={[styles.inputInline, { color: textColor }]}
 									placeholder="Digite a senha novamente"
 									placeholderTextColor={subtitleColor}
 									secureTextEntry={showConfirmarSenha}
@@ -301,7 +301,7 @@ export default function RegisterScreen({ navigation }: Props) {
 									onChangeText={setConfirmarSenha}
 								/>
 								<TouchableOpacity
-									style={{ position: 'absolute', right: 16, top: 18 }}
+									style={styles.eyeButton}
 									onPress={() => setShowConfirmarSenha((prev) => !prev)}
 								>
 									<MaterialCommunityIcons
@@ -436,5 +436,24 @@ const styles = StyleSheet.create({
 		 padding: 6,
 		 borderRadius: 20,
 		 borderWidth: 1,
+	 },
+	 inputRow: {
+	 	flexDirection: 'row',
+	 	alignItems: 'center',
+	 	borderWidth: 1.2,
+	 	borderRadius: 4,
+	 	paddingHorizontal: 14,
+	 	paddingVertical: 12,
+	 	marginBottom: 8,
+	 },
+	 inputInline: {
+	 	flex: 1,
+	 	fontSize: 16,
+	 	paddingVertical: 0,
+	 },
+	 eyeButton: {
+	 	padding: 6,
+	 	justifyContent: 'center',
+	 	alignItems: 'center',
 	 },
 });

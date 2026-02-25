@@ -28,7 +28,7 @@ const Header: React.FC = () => {
   // menu base
   const itemsBase = [
     { key: 'home', label: 'Contatos', icon: 'account-group' },
-    { key: 'profile', label: 'Perfil', icon: 'account' },
+    { key: 'profile', label: 'Minha conta', icon: 'account' },
   ];
 
   // incluir logout em todas as plataformas e mostrar ícones também no desktop

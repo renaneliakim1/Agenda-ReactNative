@@ -213,7 +213,7 @@ export default function ContactListScreen({ navigation }: Props) {
 			<ThemedView style={styles.container}>
 				<View style={[styles.header, { backgroundColor: Colors[theme].background, borderBottomColor: Colors[theme].icon }]}>
 					<View>
-								<Text style={[styles.title, { color: textColor }]}>Meus Contatos</Text>
+								<Text style={[styles.title, { color: textColor }]}></Text>
 								<Text style={[styles.subtitle, { color: subtitleColor }]}>
 									{contatos.length} {contatos.length === 1 ? 'contato' : 'contatos'}
 								</Text>
