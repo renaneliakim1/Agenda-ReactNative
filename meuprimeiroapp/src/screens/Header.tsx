@@ -31,10 +31,8 @@ const Header: React.FC = () => {
     { key: 'profile', label: 'Perfil', icon: 'account' },
   ];
 
-  // adiciona o botão de logout apenas em mobile
-  const items = isMobile
-    ? [...itemsBase, { key: 'logout', label: 'Sair', icon: 'logout' }]
-    : itemsBase;
+  // incluir logout em todas as plataformas e mostrar ícones também no desktop
+  const items = [...itemsBase, { key: 'logout', label: 'Sair', icon: 'logout' }];
 
   const handleItemPress = (key: string) => {
     if (key === 'profile') return navigation.navigate('Profile');
@@ -89,7 +87,10 @@ const Header: React.FC = () => {
                   <Text style={[styles.mobileLabel, { color: textColor }]}>{item.label}</Text>
                 </View>
               ) : (
-                <Text style={[styles.text, { color: textColor }]}>{item.label}</Text>
+                <View style={styles.desktopItemInner}>
+                  <MaterialCommunityIcons name={item.icon} size={20} color={iconColor} style={styles.desktopIcon} />
+                  <Text style={[styles.text, { color: textColor }]}>{item.label}</Text>
+                </View>
               )}
             </TouchableOpacity>
           ))}
@@ -180,6 +181,13 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
+  },
+  desktopItemInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  desktopIcon: {
+    marginRight: 8,
   },
   icon: {
     fontSize: 22,
