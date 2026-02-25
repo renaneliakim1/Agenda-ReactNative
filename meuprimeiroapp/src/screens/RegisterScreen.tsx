@@ -39,7 +39,7 @@ export default function RegisterScreen({ navigation }: Props) {
 		const [showConfirmarSenha, setShowConfirmarSenha] = useState(true);
 
 		const { theme, toggleTheme } = useTheme();
-		const tint = Colors[theme].tint;
+		const tint = Colors[theme].text;
 
 		const textColor = Colors[theme].text;
 		const subtitleColor = Colors[theme].icon;
@@ -329,7 +329,7 @@ export default function RegisterScreen({ navigation }: Props) {
 					<View style={styles.footer}>
 						<Text style={styles.footerText}>Já tem uma conta?</Text>
 						<TouchableOpacity onPress={() => navigation.navigate('Login')}>
-							<Text style={[styles.loginLink, { color: Colors[theme].tint }]}>Faça login aqui</Text>
+							<Text style={[styles.loginLink, { color: Colors[theme].text }]}>Faça login aqui</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>

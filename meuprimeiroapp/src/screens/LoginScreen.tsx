@@ -180,7 +180,7 @@ export default function LoginScreen({ navigation }: any) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-							<MaterialCommunityIcons name="lock" size={56} color={Colors[theme].tint} />
+							<MaterialCommunityIcons name="lock" size={56} color={Colors[theme].text} />
 							<Text style={[styles.title, { color: textColor }]}>Login</Text>
 							<Text style={[styles.subtitle, { color: subtitleColor }]}>Acesse sua conta</Text>
 							<TouchableOpacity
@@ -191,13 +191,13 @@ export default function LoginScreen({ navigation }: any) {
 								<MaterialCommunityIcons
 									name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
 									size={20}
-									color={Colors[theme].tint}
+									color={Colors[theme].text}
 								/>
 							</TouchableOpacity>
 						</View>
 				<View style={styles.infoContainer}>
 					<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }]}>
-						<MaterialCommunityIcons name="contacts" size={32} color={Colors[theme].tint} style={styles.infoIcon} />
+						<MaterialCommunityIcons name="contacts" size={32} color={Colors[theme].text} style={styles.infoIcon} />
 						<Text style={[styles.infoTitle, { color: textColor }]}>Sistema de Gerenciamento de Contatos</Text>
 						<Text style={[styles.infoDescription, { color: subtitleColor }] }>
 							Organize e gerencie seus contatos pessoais de forma simples e segura. 
@@ -263,13 +263,13 @@ export default function LoginScreen({ navigation }: any) {
 							style={styles.forgotPasswordContainer}
 							onPress={() => navigation.navigate('ForgotPassword')}
 						>
-							<Text style={[styles.forgotPasswordLink, { color: Colors[theme].tint }]}>Esqueci minha senha</Text>
+							<Text style={[styles.forgotPasswordLink, { color: Colors[theme].text }]}>Esqueci minha senha</Text>
 						</TouchableOpacity>
 
 						<View style={styles.registerContainer}>
 							<Text style={styles.footerText}>Não tem conta?</Text>
 							<TouchableOpacity onPress={() => navigation.navigate('Register')}>
-								<Text style={[styles.registerLink, { color: Colors[theme].tint }]}>Cadastre-se aqui</Text>
+								<Text style={[styles.registerLink, { color: Colors[theme].text }]}>Cadastre-se aqui</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

@@ -166,7 +166,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-						<MaterialCommunityIcons name="lock-reset" size={56} color={Colors[theme].tint} />
+						<MaterialCommunityIcons name="lock-reset" size={56} color={Colors[theme].text} />
 						<Text style={[styles.title, { color: textColor }]}>Esqueci Minha Senha</Text>
 						<Text style={[styles.subtitle, { color: subtitleColor }]}>
 							Digite seu email para receber um link de redefinição
@@ -176,14 +176,14 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 							onPress={toggleTheme}
 							hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
 						>
-							<MaterialCommunityIcons name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'} size={20} color={Colors[theme].tint} />
+							<MaterialCommunityIcons name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'} size={20} color={Colors[theme].text} />
 						</TouchableOpacity>
 					</View>
 
 					<View style={styles.infoContainer}>
 						<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }] }>
-							<MaterialCommunityIcons name="information" size={24} color={Colors[theme].tint} style={styles.infoIcon} />
-							<Text style={[styles.infoText, { color: Colors[theme].tint }] }>
+							<MaterialCommunityIcons name="information" size={24} color={Colors[theme].text} style={styles.infoIcon} />
+							<Text style={[styles.infoText, { color: Colors[theme].text }] }>
 								Você receberá um email com instruções para criar uma nova senha.
 								O link expira em 1 hora.
 							</Text>
@@ -217,11 +217,11 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							style={[styles.buttonSecondary, { borderColor: Colors[theme].tint, backgroundColor: Colors[theme].background }]}
+							style={[styles.buttonSecondary, { borderColor: Colors[theme].text, backgroundColor: Colors[theme].background }]}
 							onPress={() => navigation.navigate('Login')}
 						>
-							<MaterialCommunityIcons name="arrow-left" size={20} color={Colors[theme].tint} />
-							<Text style={[styles.buttonSecondaryText, { color: Colors[theme].tint }]}>Voltar para o Login</Text>
+							<MaterialCommunityIcons name="arrow-left" size={20} color={Colors[theme].text} />
+							<Text style={[styles.buttonSecondaryText, { color: Colors[theme].text }]}>Voltar para o Login</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>
