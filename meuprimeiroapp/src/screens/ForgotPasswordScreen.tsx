@@ -69,15 +69,15 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
 		try {
 			console.log('📧 Enviando email de redefinição de senha...');
-			
+
 			// Configurar URL de redirecionamento após redefinir senha
 			let redirectUrl = 'https://react-native-ebon.vercel.app/';
-			
+
 			// Para web, detecta automaticamente a URL (localhost ou produção)
 			if (Platform.OS === 'web' && typeof window !== 'undefined') {
 				redirectUrl = window.location.origin + '/';
 			}
-			
+
 			const actionCodeSettings = {
 				url: redirectUrl,
 				handleCodeInApp: false,
@@ -85,9 +85,9 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
 			console.log('🔗 URL de redirecionamento:', redirectUrl);
 			await sendPasswordResetEmail(auth, email.trim(), actionCodeSettings);
-			
+
 			console.log('✅ Email enviado com sucesso!');
-			
+
 			if (Platform.OS === 'web') {
 				window.alert(
 					'Email Enviado!\n\n' +
@@ -112,10 +112,10 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 		} catch (error: any) {
 			console.error('❌ Erro ao enviar email:', error);
 			console.error('Código do erro:', error?.code);
-			
+
 			let titulo = 'Erro ao Enviar Email';
 			let mensagem = 'Não foi possível enviar o email de redefinição. Tente novamente.';
-			
+
 			if (error && error.code) {
 				switch (error.code) {
 					case 'auth/invalid-email':
@@ -156,12 +156,12 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
 	return (
 		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
-			<KeyboardAvoidingView 
+			<KeyboardAvoidingView
 				style={[styles.container, { backgroundColor: Colors[theme].background }]}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
-				<ScrollView 
+				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
 				>
@@ -181,9 +181,9 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 					</View>
 
 					<View style={styles.infoContainer}>
-						<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }] }>
+						<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }]}>
 							<MaterialCommunityIcons name="information" size={24} color={Colors[theme].text} style={styles.infoIcon} />
-							<Text style={[styles.infoText, { color: Colors[theme].text }] }>
+							<Text style={[styles.infoText, { color: Colors[theme].text }]}>
 								Você receberá um email com instruções para criar uma nova senha.
 								O link expira em 1 hora.
 							</Text>
@@ -195,7 +195,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 							<Text style={[styles.label, { color: textColor }]}>Email</Text>
 							<TextInput
 								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
-								placeholder="seu@email.com"
+								placeholder="seu_email@email.com"
 								placeholderTextColor={subtitleColor}
 								keyboardType="email-address"
 								autoCapitalize="none"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet, Alert, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Alert, TouchableOpacity, Platform, TextInput, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
 import { db, auth } from '../config/firebaseConfig';
 import { useTheme } from '../context/ThemeContext';
@@ -10,12 +10,21 @@ import { deleteUser, signOut } from 'firebase/auth';
 export default function ProfileScreen({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState(true);
   const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const textColor = Colors[theme].text;
   const labelColor = Colors[theme].icon;
-  const cardBg = theme === 'light' ? '#fff' : '#0f1415';
+  const inputBg = isDark ? '#1F2937' : '#F3F4F6';
+  const cardBg = isDark ? '#111827' : '#FFFFFF';
+  const borderColor = isDark ? '#374151' : '#E5E7EB';
   const loaderColor = Colors[theme].tint;
   const [userData, setUserData] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  // Edit state
+  const [isEditing, setIsEditing] = useState(false);
+  const [nomeText, setNomeText] = useState('');
+  const [telefoneText, setTelefoneText] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -32,9 +41,17 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
         const snap = await getDoc(userRef);
 
         if (snap.exists()) {
-          if (mounted) setUserData(snap.data());
+          const data = snap.data();
+          if (mounted) {
+            setUserData(data);
+            setNomeText(data.nome || currentUser.displayName || '');
+            setTelefoneText(data.telefone || '');
+          }
         } else {
-          if (mounted) setUserData(null);
+          if (mounted) {
+            setUserData(null);
+            setNomeText(currentUser.displayName || '');
+          }
         }
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
@@ -203,6 +220,43 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     }
   };
 
+  const handleSaveProfile = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+
+    if (!nomeText.trim()) {
+      Alert.alert('Erro', 'O nome não pode ficar vazio.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // 1. Atualizar no Firestore
+      const userRef = doc(db, 'usuarios', currentUser.uid);
+      await setDoc(userRef, {
+        nome: nomeText,
+        telefone: telefoneText,
+        // preserve email 
+      }, { merge: true });
+
+      // 2. Atualizar no Auth (apenas nome)
+      // Nota: não atualizamos email ou senha aqui por motivos de complexidade de reautenticação em edição básica.
+      if (typeof import('firebase/auth').then === 'function') {
+        const { updateProfile } = await import('firebase/auth');
+        await updateProfile(currentUser, { displayName: nomeText });
+      }
+
+      setUserData((prev: any) => ({ ...prev, nome: nomeText, telefone: telefoneText }));
+      setIsEditing(false);
+      Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      Alert.alert('Erro', 'Houve um erro ao atualizar o perfil.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <ThemedView style={styles.container}>
@@ -217,28 +271,97 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.card, { backgroundColor: cardBg }]}>
-        <Text style={[styles.label, { color: labelColor }]}>Nome</Text>
-        <Text style={[styles.value, { color: textColor }]}>{displayName}</Text>
-
-        <Text style={[styles.label, { color: labelColor }]}>E-mail</Text>
-        <Text style={[styles.value, { color: textColor }]}>{displayEmail}</Text>
-
-        <Text style={[styles.label, { color: labelColor }]}>Telefone</Text>
-        <Text style={[styles.value, { color: textColor }]}>{userData?.telefone || 'Sem telefone'}</Text>
-      </View>
-
-      <View style={{ height: 16 }} />
-
-      <TouchableOpacity
-        style={styles.deleteButton}
-        onPress={handleDeleteAccount}
-        disabled={deleting}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={{ width: '100%', flex: 1 }}
       >
-        <Text style={styles.deleteButtonText}>
-          {deleting ? 'Apagando...' : 'Apagar conta'}
-        </Text>
-      </TouchableOpacity>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.card, { backgroundColor: cardBg, borderColor, borderWidth: isDark ? 1 : 0 }]}>
+            <View style={[styles.cardHeader, { borderBottomColor: borderColor }]}>
+              <Text style={[styles.cardTitle, { color: textColor }]}>Meus Dados</Text>
+              <TouchableOpacity
+                onPress={() => isEditing ? setIsEditing(false) : setIsEditing(true)}
+                style={styles.editToggleBtn}
+              >
+                <Text style={[styles.editToggleText, { color: loaderColor }]}>{isEditing ? 'Cancelar' : 'Editar'}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={[styles.label, { color: labelColor }]}>Nome</Text>
+            {isEditing ? (
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: inputBg,
+                    color: textColor,
+                    borderColor: borderColor,
+                  }
+                ]}
+                value={nomeText}
+                onChangeText={setNomeText}
+                placeholder="Seu nome"
+                placeholderTextColor={labelColor}
+              />
+            ) : (
+              <Text style={[styles.value, { color: textColor }]}>{displayName}</Text>
+            )}
+
+            <Text style={[styles.label, { color: labelColor }]}>E-mail (não editável aqui)</Text>
+            <Text style={[styles.value, { color: textColor, opacity: 0.7 }]}>{displayEmail}</Text>
+
+            <Text style={[styles.label, { color: labelColor }]}>Telefone</Text>
+            {isEditing ? (
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: inputBg,
+                    color: textColor,
+                    borderColor: borderColor,
+                  }
+                ]}
+                value={telefoneText}
+                onChangeText={(text) => setTelefoneText(text.replace(/\D/g, '').slice(0, 11))}
+                placeholder="(00) 00000-0000"
+                keyboardType="phone-pad"
+                placeholderTextColor={labelColor}
+              />
+            ) : (
+              <Text style={[styles.value, { color: textColor }]}>{userData?.telefone || 'Sem telefone'}</Text>
+            )}
+
+          </View>
+
+          {isEditing && (
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: loaderColor }]}
+              onPress={handleSaveProfile}
+              disabled={saving}
+            >
+              <Text style={[styles.saveButtonText, { color: isDark ? '#000' : '#fff' }]}>
+                {saving ? 'Salvando...' : 'Salvar Alterações'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          <View style={{ height: 32 }} />
+
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={handleDeleteAccount}
+            disabled={deleting}
+          >
+            <Text style={styles.deleteButtonText}>
+              {deleting ? 'Apagando...' : 'Apgar conta definitivamente'}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -246,30 +369,76 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 24,
   },
   card: {
     width: '100%',
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
+    padding: 24,
+    borderRadius: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 12,
+    elevation: 8,
   },
   label: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 10,
+    fontSize: 13,
+    fontWeight: '600',
+    marginTop: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   value: {
     fontSize: 18,
-    color: '#333',
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    borderBottomWidth: 1,
+    paddingBottom: 16,
+  },
+  cardTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  editToggleBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+  },
+  editToggleText: {
     fontWeight: '600',
+    fontSize: 14,
+  },
+  input: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    fontSize: 16,
+    borderWidth: 1,
+  },
+  saveButton: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 24,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  saveButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
   loadingText: {
     marginTop: 12,
@@ -277,19 +446,16 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     width: '100%',
-    backgroundColor: '#EF4444',
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: '#EF4444',
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: 'center',
   },
   deleteButtonText: {
-    color: '#fff',
-    fontWeight: '700',
+    color: '#EF4444',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
-
-
-
-
-
-
