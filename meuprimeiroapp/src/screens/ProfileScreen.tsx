@@ -4,7 +4,7 @@ import { ThemedView } from '../../components/themed-view';
 import { db, auth } from '../config/firebaseConfig';
 import { useTheme } from '../context/ThemeContext';
 import { Colors } from '../../constants/theme';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { deleteUser, signOut } from 'firebase/auth';
 
 export default function ProfileScreen({ navigation }: { navigation: any }) {
@@ -28,7 +28,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
           return;
         }
 
-        const userRef = doc(db, 'users', currentUser.uid);
+        const userRef = doc(db, 'usuarios', currentUser.uid);
         const snap = await getDoc(userRef);
 
         if (snap.exists()) {
@@ -89,6 +89,16 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     console.log('[Profile] Iniciando exclusão do usuário:', currentUser.uid);
     setDeleting(true);
 
+    let backupData: any = null;
+    try {
+      const docSnap = await getDoc(doc(db, 'usuarios', currentUser.uid));
+      if (docSnap.exists()) {
+        backupData = docSnap.data();
+      }
+    } catch (e) {
+      console.warn('Falha ao fazer backup do documento do usuário:', e);
+    }
+
     // tentar dar reload no usuário para garantir estado atualizado
     try {
       if (typeof (currentUser as any).reload === 'function') {
@@ -102,7 +112,7 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
 
     // 🔥 1) Deletar documento do Firestore primeiro (permite usar credenciais atuais)
     try {
-      const userRef = doc(db, 'users', currentUser.uid);
+      const userRef = doc(db, 'usuarios', currentUser.uid);
       await deleteDoc(userRef);
       console.log('[Profile] Documento removido do Firestore');
     } catch (firestoreErr) {
@@ -150,6 +160,15 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
     } catch (authErr: any) {
       console.warn('[Profile] Erro ao deletar usuário do Auth:', authErr);
       if (authErr?.code === 'auth/requires-recent-login') {
+        // Restaurar o documento do Firestore, pois a exclusão da conta falhou
+        if (backupData) {
+          try {
+            await setDoc(doc(db, 'usuarios', currentUser.uid), backupData);
+            console.log('[Profile] Documento restaurado no Firestore devido a falha no Auth');
+          } catch (restoreErr) {
+            console.error('[Profile] Falha fatal ao restaurar documento:', restoreErr);
+          }
+        }
         Alert.alert(
           'Reautenticação necessária',
           'Para apagar a conta é necessário entrar novamente. Deseja sair e efetuar o login novamente?',
@@ -166,13 +185,18 @@ export default function ProfileScreen({ navigation }: { navigation: any }) {
                   Alert.alert('Erro ao deslogar', String(signErr));
                 } finally {
                   setDeleting(false);
-                  navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
                 }
               },
             },
           ],
         );
       } else {
+        // Tentar restaurar o documento do Firestore em outros erros também
+        if (backupData) {
+          try {
+            await setDoc(doc(db, 'usuarios', currentUser.uid), backupData);
+          } catch (e) { }
+        }
         Alert.alert('Erro', `Não foi possível apagar o usuário do Auth: ${authErr?.code || ''} ${authErr?.message || String(authErr)}`);
         setDeleting(false);
       }

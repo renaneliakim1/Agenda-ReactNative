@@ -25,7 +25,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 type RegisterScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Register'>;
 
 type Props = {
-  navigation: RegisterScreenNavigationProp;
+	navigation: RegisterScreenNavigationProp;
 };
 
 export default function RegisterScreen({ navigation }: Props) {
@@ -34,19 +34,19 @@ export default function RegisterScreen({ navigation }: Props) {
 	const [senha, setSenha] = useState('');
 	const [confirmarSenha, setConfirmarSenha] = useState('');
 	const [telefone, setTelefone] = useState('');
-		const [loading, setLoading] = useState(false);
-		const [showSenha, setShowSenha] = useState(true);
-		const [showConfirmarSenha, setShowConfirmarSenha] = useState(true);
+	const [loading, setLoading] = useState(false);
+	const [showSenha, setShowSenha] = useState(true);
+	const [showConfirmarSenha, setShowConfirmarSenha] = useState(true);
 
-		const { theme, toggleTheme } = useTheme();
-		const tint = Colors[theme].text;
+	const { theme, toggleTheme } = useTheme();
+	const tint = Colors[theme].text;
 
-		const textColor = Colors[theme].text;
-		const subtitleColor = Colors[theme].icon;
-		const inputBg = theme === 'light' ? '#F8FAFC' : '#0f1415';
-		const inputBorderColor = theme === 'light' ? '#D1D5DB' : Colors[theme].icon;
-		const buttonBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
-		const buttonTextColor = '#fff';
+	const textColor = Colors[theme].text;
+	const subtitleColor = Colors[theme].icon;
+	const inputBg = theme === 'light' ? '#F8FAFC' : '#0f1415';
+	const inputBorderColor = theme === 'light' ? '#D1D5DB' : Colors[theme].icon;
+	const buttonBg = theme === 'light' ? Colors[theme].tint : Colors.light.tint;
+	const buttonTextColor = '#fff';
 
 	// Validação de e-mail
 	function isValidEmail(email: string) {
@@ -64,7 +64,7 @@ export default function RegisterScreen({ navigation }: Props) {
 	const handleRegister = async () => {
 		console.log('🔵 Botão Criar Conta clicado!');
 		console.log('Dados:', { nome, email, telefone, senha: senha ? '***' : '', confirmarSenha: confirmarSenha ? '***' : '' });
-		
+
 		// Validações
 		if (!nome || !email || !senha || !confirmarSenha || !telefone) {
 			console.log('❌ Campos vazios detectados');
@@ -131,8 +131,7 @@ export default function RegisterScreen({ navigation }: Props) {
 					{
 						text: 'OK',
 						onPress: () => {
-							console.log('Navegando para Login...');
-							navigation.navigate('Login');
+							console.log('Cadastro concluído, redirecionamento automático pelo AppNavigator.');
 						},
 					},
 				]
@@ -142,9 +141,9 @@ export default function RegisterScreen({ navigation }: Props) {
 			console.error('❌ ERRO NO CADASTRO:', error);
 			console.error('Código do erro:', error?.code);
 			console.error('Mensagem:', error?.message);
-			
+
 			let message = 'Erro ao realizar cadastro';
-			
+
 			if (error && error.code) {
 				switch (error.code) {
 					case 'permission-denied':
@@ -206,12 +205,12 @@ export default function RegisterScreen({ navigation }: Props) {
 
 	return (
 		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
-			<KeyboardAvoidingView 
+			<KeyboardAvoidingView
 				style={[styles.container, { backgroundColor: Colors[theme].background }]}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
-				<ScrollView 
+				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
 				>
@@ -267,7 +266,7 @@ export default function RegisterScreen({ navigation }: Props) {
 
 						<View style={styles.inputGroup}>
 							<Text style={[styles.label, { color: textColor }]}>Senha</Text>
-							<View style={[styles.inputRow, { backgroundColor: inputBg, borderColor: inputBorderColor }]}> 
+							<View style={[styles.inputRow, { backgroundColor: inputBg, borderColor: inputBorderColor }]}>
 								<TextInput
 									style={[styles.inputInline, { color: textColor }]}
 									placeholder="Mínimo 6 caracteres"
@@ -291,7 +290,7 @@ export default function RegisterScreen({ navigation }: Props) {
 
 						<View style={styles.inputGroup}>
 							<Text style={[styles.label, { color: textColor }]}>Confirmar Senha</Text>
-							<View style={[styles.inputRow, { backgroundColor: inputBg, borderColor: inputBorderColor }]}> 
+							<View style={[styles.inputRow, { backgroundColor: inputBg, borderColor: inputBorderColor }]}>
 								<TextInput
 									style={[styles.inputInline, { color: textColor }]}
 									placeholder="Digite a senha novamente"
@@ -339,121 +338,121 @@ export default function RegisterScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-	 safeArea: {
-		 flex: 1,
-		 backgroundColor: '#F4F4F5',
-	 },
-	 container: {
-		 flex: 1,
-		 backgroundColor: '#FFF',
-	 },
-	 scrollContent: {
-		 flexGrow: 1,
-		 justifyContent: 'center',
-		 paddingHorizontal: 20,
-		 paddingVertical: 40,
-	 },
-	 headerContainer: {
-		 alignItems: 'center',
-		 marginBottom: 32,
-	 },
-	 title: {
-		 fontSize: 32,
-		 fontWeight: '700',
-		 color: '#22223B',
-		 marginBottom: 8,
-		 textAlign: 'center',
-	 },
-	 subtitle: {
-		 fontSize: 16,
-		 color: '#6B7280',
-		 textAlign: 'center',
-		 fontWeight: '400',
-	 },
-	 formContainer: {
-		 marginBottom: 24,
-		 gap: 12,
-	 },
-	 inputGroup: {
-		 marginBottom: 4,
-	 },
-	 label: {
-		 fontSize: 14,
-		 fontWeight: '600',
-		 marginBottom: 8,
-		 color: '#22223B',
-		 letterSpacing: 0.3,
-	 },
-	 input: {
-		 borderWidth: 1.2,
-		 borderColor: '#D1D5DB',
-		 borderRadius: 4,
-		 paddingHorizontal: 14,
-		 paddingVertical: 12,
-		 fontSize: 16,
-		 backgroundColor: '#F8FAFC',
-		 color: '#22223B',
-		 fontWeight: '500',
-	 },
-	 button: {
-		 backgroundColor: '#2563EB',
-		 borderRadius: 4,
-		 paddingVertical: 14,
-		 paddingHorizontal: 20,
-		 alignItems: 'center',
-		 marginTop: 12,
-		 elevation: 2,
-	 },
-	 buttonDisabled: {
-		 backgroundColor: '#A5B4FC',
-		 opacity: 0.7,
-	 },
-	 buttonText: {
-		 color: '#FFF',
-		 fontSize: 16,
-		 fontWeight: '700',
-		 letterSpacing: 0.5,
-	 },
-	 footer: {
-		 alignItems: 'center',
-		 gap: 4,
-	 },
-	 footerText: {
-		 fontSize: 14,
-		 color: '#6B7280',
-		 fontWeight: '400',
-	 },
-	 loginLink: {
-		 fontSize: 14,
-		 color: '#2563EB',
-		 fontWeight: '700',
-		 letterSpacing: 0.3,
-	 },
-	 themeButton: {
-		 position: 'absolute',
-		 right: 12,
-		 top: 8,
-		 padding: 6,
-		 borderRadius: 20,
-		 borderWidth: 1,
-	 },
-	 inputRow: {
-	 	flexDirection: 'row',
-	 	alignItems: 'center',
-	 	borderWidth: 1.2,
-	 	borderRadius: 4,
-	 	paddingHorizontal: 14,
-	 	paddingVertical: 12,
-	 	marginBottom: 8,
-	 },
-	 inputInline: {
-	 	flex: 1,
-	 	fontSize: 16,
-	 	paddingVertical: 0,
-	 },
-	 eyeButton: {
-	 	padding: 6,
-	 	justifyContent: 'center',
-	 	alignItems: 'center',
-	 },
+	safeArea: {
+		flex: 1,
+		backgroundColor: '#F4F4F5',
+	},
+	container: {
+		flex: 1,
+		backgroundColor: '#FFF',
+	},
+	scrollContent: {
+		flexGrow: 1,
+		justifyContent: 'center',
+		paddingHorizontal: 20,
+		paddingVertical: 40,
+	},
+	headerContainer: {
+		alignItems: 'center',
+		marginBottom: 32,
+	},
+	title: {
+		fontSize: 32,
+		fontWeight: '700',
+		color: '#22223B',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	subtitle: {
+		fontSize: 16,
+		color: '#6B7280',
+		textAlign: 'center',
+		fontWeight: '400',
+	},
+	formContainer: {
+		marginBottom: 24,
+		gap: 12,
+	},
+	inputGroup: {
+		marginBottom: 4,
+	},
+	label: {
+		fontSize: 14,
+		fontWeight: '600',
+		marginBottom: 8,
+		color: '#22223B',
+		letterSpacing: 0.3,
+	},
+	input: {
+		borderWidth: 1.2,
+		borderColor: '#D1D5DB',
+		borderRadius: 4,
+		paddingHorizontal: 14,
+		paddingVertical: 12,
+		fontSize: 16,
+		backgroundColor: '#F8FAFC',
+		color: '#22223B',
+		fontWeight: '500',
+	},
+	button: {
+		backgroundColor: '#2563EB',
+		borderRadius: 4,
+		paddingVertical: 14,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		marginTop: 12,
+		elevation: 2,
+	},
+	buttonDisabled: {
+		backgroundColor: '#A5B4FC',
+		opacity: 0.7,
+	},
+	buttonText: {
+		color: '#FFF',
+		fontSize: 16,
+		fontWeight: '700',
+		letterSpacing: 0.5,
+	},
+	footer: {
+		alignItems: 'center',
+		gap: 4,
+	},
+	footerText: {
+		fontSize: 14,
+		color: '#6B7280',
+		fontWeight: '400',
+	},
+	loginLink: {
+		fontSize: 14,
+		color: '#2563EB',
+		fontWeight: '700',
+		letterSpacing: 0.3,
+	},
+	themeButton: {
+		position: 'absolute',
+		right: 12,
+		top: 8,
+		padding: 6,
+		borderRadius: 20,
+		borderWidth: 1,
+	},
+	inputRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		borderWidth: 1.2,
+		borderRadius: 4,
+		paddingHorizontal: 14,
+		paddingVertical: 12,
+		marginBottom: 8,
+	},
+	inputInline: {
+		flex: 1,
+		fontSize: 16,
+		paddingVertical: 0,
+	},
+	eyeButton: {
+		padding: 6,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
 });
