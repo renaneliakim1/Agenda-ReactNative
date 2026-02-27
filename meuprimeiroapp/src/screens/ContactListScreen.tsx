@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
- 	View,
- 	Text,
- 	StyleSheet,
- 	FlatList,
- 	TouchableOpacity,
- 	Alert,
- 	SafeAreaView,
- 	ActivityIndicator,
- 	useWindowDimensions,
- 	Platform,
+	View,
+	Text,
+	StyleSheet,
+	FlatList,
+	TouchableOpacity,
+	Alert,
+	SafeAreaView,
+	ActivityIndicator,
+	useWindowDimensions,
+	Platform,
 } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,7 +24,7 @@ import { signOut } from 'firebase/auth';
 type ContactListScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ContactList'>;
 
 type Props = {
-  navigation: ContactListScreenNavigationProp;
+	navigation: ContactListScreenNavigationProp;
 };
 
 interface Contact {
@@ -33,6 +33,8 @@ interface Contact {
 	email: string;
 	idade: number;
 	telefone: string;
+	usuarioId: string;
+	criadoEm: any;
 }
 
 export default function ContactListScreen({ navigation }: Props) {
@@ -47,8 +49,8 @@ export default function ContactListScreen({ navigation }: Props) {
 	const [contatos, setContatos] = useState<Contact[]>([]);
 	const [loading, setLoading] = useState(true);
 
- 	const { width } = useWindowDimensions();
- 	const isMobile = width < 768;
+	const { width } = useWindowDimensions();
+	const isMobile = width < 768;
 
 	useEffect(() => {
 		const user = auth.currentUser;
@@ -168,7 +170,7 @@ export default function ContactListScreen({ navigation }: Props) {
 	};
 
 	const renderContact = ({ item }: { item: Contact }) => (
-		<View style={[styles.contactCard, { backgroundColor: cardBg }]}> 
+		<View style={[styles.contactCard, { backgroundColor: cardBg }]}>
 			<View style={styles.contactHeader}>
 				<View style={styles.avatar}>
 					<Text style={styles.avatarText}>
@@ -176,24 +178,32 @@ export default function ContactListScreen({ navigation }: Props) {
 					</Text>
 				</View>
 				<View style={styles.contactInfo}>
-						<Text style={[styles.contactName, { color: textColor }]}>{item.nome}</Text>
-						<Text style={[styles.contactDetail, { color: subtitleColor }] }>
-							<MaterialCommunityIcons name="email" size={14} color={iconColor} /> {item.email}
-						</Text>
-						<Text style={[styles.contactDetail, { color: subtitleColor }]}>
-							<MaterialCommunityIcons name="phone" size={14} color={iconColor} /> {item.telefone}
-						</Text>
-						<Text style={[styles.contactDetail, { color: subtitleColor }]}>
-							<MaterialCommunityIcons name="cake-variant" size={14} color={iconColor} /> {item.idade} anos
-						</Text>
+					<Text style={[styles.contactName, { color: textColor }]}>{item.nome}</Text>
+					<Text style={[styles.contactDetail, { color: subtitleColor }]}>
+						<MaterialCommunityIcons name="email" size={14} color={iconColor} /> {item.email}
+					</Text>
+					<Text style={[styles.contactDetail, { color: subtitleColor }]}>
+						<MaterialCommunityIcons name="phone" size={14} color={iconColor} /> {item.telefone}
+					</Text>
+					<Text style={[styles.contactDetail, { color: subtitleColor }]}>
+						<MaterialCommunityIcons name="cake-variant" size={14} color={iconColor} /> {item.idade} anos
+					</Text>
 				</View>
 			</View>
-			<TouchableOpacity
-				style={styles.deleteButton}
-				onPress={() => handleDeleteContact(item.id, item.nome)}
-			>
-				<MaterialCommunityIcons name="delete" size={24} color="#EF4444" />
-			</TouchableOpacity>
+			<View style={styles.actionButtons}>
+				<TouchableOpacity
+					style={styles.actionButton}
+					onPress={() => navigation.navigate('EditContact', { contact: item })}
+				>
+					<MaterialCommunityIcons name="pencil" size={24} color="#6366F1" />
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.actionButton}
+					onPress={() => handleDeleteContact(item.id, item.nome)}
+				>
+					<MaterialCommunityIcons name="delete" size={24} color="#EF4444" />
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 
@@ -213,10 +223,10 @@ export default function ContactListScreen({ navigation }: Props) {
 			<ThemedView style={styles.container}>
 				<View style={[styles.header, { backgroundColor: Colors[theme].background, borderBottomColor: Colors[theme].icon }]}>
 					<View>
-								<Text style={[styles.title, { color: textColor }]}></Text>
-								<Text style={[styles.subtitle, { color: subtitleColor }]}>
-									{contatos.length} {contatos.length === 1 ? 'contato' : 'contatos'}
-								</Text>
+						<Text style={[styles.title, { color: textColor }]}></Text>
+						<Text style={[styles.subtitle, { color: subtitleColor }]}>
+							{contatos.length} {contatos.length === 1 ? 'contato' : 'contatos'}
+						</Text>
 					</View>
 					{/* <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
 						<MaterialCommunityIcons name="logout" size={24} color="#EF4444" />
@@ -361,8 +371,13 @@ const styles = StyleSheet.create({
 		color: '#6B7280',
 		marginTop: 2,
 	},
-	deleteButton: {
+	actionButtons: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	actionButton: {
 		padding: 8,
+		marginLeft: 4,
 	},
 	fab: {
 		position: 'absolute',

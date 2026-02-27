@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ThemedView } from '../../components/themed-view';
+import { useTheme } from '../context/ThemeContext';
+import { Colors } from '../../constants/theme';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -30,11 +32,17 @@ type Props = {
 
 export default function EditContactScreen({ navigation, route }: Props) {
 	const { contact } = route.params;
-	
-	const [nome, setNome] = useState(contact.nome);
-	const [email, setEmail] = useState(contact.email);
-	const [idade, setIdade] = useState(contact.idade.toString());
-	const [telefone, setTelefone] = useState(contact.telefone);
+	const { theme } = useTheme();
+	const textColor = Colors[theme].text;
+	const subtitleColor = Colors[theme].icon;
+	const inputBg = theme === 'light' ? '#FFFFFF' : Colors.dark.background;
+	const inputBorder = theme === 'light' ? '#E5E7EB' : '#374151';
+	const cardBg = theme === 'light' ? '#FFFFFF' : Colors.dark.background;
+
+	const [nome, setNome] = useState(contact.nome || '');
+	const [email, setEmail] = useState(contact.email || '');
+	const [idade, setIdade] = useState(contact.idade?.toString() || '');
+	const [telefone, setTelefone] = useState(contact.telefone || '');
 	const [loading, setLoading] = useState(false);
 
 	// Validação de e-mail
@@ -52,7 +60,7 @@ export default function EditContactScreen({ navigation, route }: Props) {
 
 	const handleUpdateContact = async () => {
 		console.log('📝 Atualizando contato:', contact.id);
-		
+
 		// Validações
 		if (!nome || !email || !idade || !telefone) {
 			mostrarErro('Por favor, preencha todos os campos');
@@ -79,17 +87,17 @@ export default function EditContactScreen({ navigation, route }: Props) {
 
 		try {
 			const contatoRef = doc(db, 'contatos', contact.id);
-			
+
 			await updateDoc(contatoRef, {
 				nome,
 				email,
 				idade: idadeNum,
 				telefone,
 			});
-			
+
 			console.log('✅ Contato atualizado com sucesso!');
 			mostrarSucesso('Contato atualizado com sucesso!');
-			
+
 			setTimeout(() => {
 				navigation.goBack();
 			}, 500);
@@ -104,39 +112,39 @@ export default function EditContactScreen({ navigation, route }: Props) {
 
 	return (
 		<ThemedView style={styles.safeArea}>
-			<KeyboardAvoidingView 
+			<KeyboardAvoidingView
 				style={styles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
-				<ScrollView 
+				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
 						<MaterialCommunityIcons name="account-edit" size={56} color="#6366F1" />
-						<Text style={styles.title}>Editar Contato</Text>
-						<Text style={styles.subtitle}>Atualize as informações do contato</Text>
+						<Text style={[styles.title, { color: textColor }]}>Editar Contato</Text>
+						<Text style={[styles.subtitle, { color: subtitleColor }]}>Atualize as informações do contato</Text>
 					</View>
 
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Nome Completo</Text>
+							<Text style={[styles.label, { color: textColor }]}>Nome Completo</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
 								placeholder="Ex: João Silva"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								value={nome}
 								onChangeText={setNome}
 							/>
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Email</Text>
+							<Text style={[styles.label, { color: textColor }]}>Email</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
 								placeholder="seu@email.com"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								keyboardType="email-address"
 								autoCapitalize="none"
 								value={email}
@@ -145,11 +153,11 @@ export default function EditContactScreen({ navigation, route }: Props) {
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Idade</Text>
+							<Text style={[styles.label, { color: textColor }]}>Idade</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
 								placeholder="Ex: 25"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								keyboardType="numeric"
 								value={idade}
 								onChangeText={setIdade}
@@ -158,11 +166,11 @@ export default function EditContactScreen({ navigation, route }: Props) {
 						</View>
 
 						<View style={styles.inputGroup}>
-							<Text style={styles.label}>Telefone</Text>
+							<Text style={[styles.label, { color: textColor }]}>Telefone</Text>
 							<TextInput
-								style={styles.input}
+								style={[styles.input, { backgroundColor: inputBg, borderColor: inputBorder, color: textColor }]}
 								placeholder="(11) 98765-4321"
-								placeholderTextColor="#9CA3AF"
+								placeholderTextColor={subtitleColor}
 								keyboardType="phone-pad"
 								value={telefone}
 								onChangeText={setTelefone}
@@ -185,11 +193,11 @@ export default function EditContactScreen({ navigation, route }: Props) {
 						</TouchableOpacity>
 
 						<TouchableOpacity
-							style={styles.cancelButton}
+							style={[styles.cancelButton, { backgroundColor: cardBg, borderColor: inputBorder }]}
 							onPress={() => navigation.goBack()}
 							disabled={loading}
 						>
-							<Text style={styles.cancelButtonText}>Cancelar</Text>
+							<Text style={[styles.cancelButtonText, { color: textColor }]}>Cancelar</Text>
 						</TouchableOpacity>
 					</View>
 				</ScrollView>
