@@ -10,9 +10,11 @@ import {
 	ActivityIndicator,
 	useWindowDimensions,
 	Platform,
+	TextInput,
 } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { Colors } from '../../constants/theme';
 import { collection, query, where, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
@@ -47,10 +49,13 @@ export default function ContactListScreen({ navigation }: Props) {
 	const fabIconColor = '#FFFFFF';
 
 	const [contatos, setContatos] = useState<Contact[]>([]);
+	const [filteredContatos, setFilteredContatos] = useState<Contact[]>([]);
+	const [searchQuery, setSearchQuery] = useState('');
 	const [loading, setLoading] = useState(true);
 
 	const { width } = useWindowDimensions();
 	const isMobile = width < 768;
+	const insets = useSafeAreaInsets();
 
 	useEffect(() => {
 		const user = auth.currentUser;
@@ -85,6 +90,12 @@ export default function ContactListScreen({ navigation }: Props) {
 				});
 
 				setContatos(contatosData);
+				// Aplicar filtro inicial ou resetar a lista filtrada
+				if (searchQuery.trim() === '') {
+					setFilteredContatos(contatosData);
+				} else {
+					filterContacts(searchQuery, contatosData);
+				}
 				setLoading(false);
 			},
 			(error) => {
@@ -96,6 +107,27 @@ export default function ContactListScreen({ navigation }: Props) {
 
 		return () => unsubscribe();
 	}, []);
+
+	// Função para atualizar o filtro
+	const handleSearch = (text: string) => {
+		setSearchQuery(text);
+		filterContacts(text, contatos);
+	};
+
+	// Lógica de filtragem unificada
+	const filterContacts = (text: string, list: Contact[]) => {
+		if (text.trim() === '') {
+			setFilteredContatos(list);
+		} else {
+			const lowerQuery = text.toLowerCase();
+			const filtered = list.filter((c) =>
+				c.nome.toLowerCase().includes(lowerQuery) ||
+				c.email.toLowerCase().includes(lowerQuery) ||
+				c.telefone.includes(text)
+			);
+			setFilteredContatos(filtered);
+		}
+	};
 
 	const handleDeleteContact = (id: string, nome: string) => {
 		const performDelete = async () => {
@@ -233,6 +265,23 @@ export default function ContactListScreen({ navigation }: Props) {
 					</TouchableOpacity> */}
 				</View>
 
+				{/* Search Bar */}
+				<View style={[styles.searchContainer, { backgroundColor: cardBg, borderColor: theme === 'dark' ? '#374151' : '#E5E7EB' }]}>
+					<MaterialCommunityIcons name="magnify" size={24} color={subtitleColor} style={styles.searchIcon} />
+					<TextInput
+						style={[styles.searchInput, { color: textColor }]}
+						placeholder="Buscar por nome, email ou telefone..."
+						placeholderTextColor={subtitleColor}
+						value={searchQuery}
+						onChangeText={handleSearch}
+					/>
+					{searchQuery.length > 0 && (
+						<TouchableOpacity onPress={() => handleSearch('')} style={styles.clearSearchBtn}>
+							<MaterialCommunityIcons name="close-circle" size={20} color={subtitleColor} />
+						</TouchableOpacity>
+					)}
+				</View>
+
 				{contatos.length === 0 ? (
 					<View style={styles.emptyContainer}>
 						<MaterialCommunityIcons name="account-off" size={80} color={iconColor} />
@@ -241,9 +290,17 @@ export default function ContactListScreen({ navigation }: Props) {
 							Adicione seu primeiro contato para começar
 						</Text>
 					</View>
+				) : filteredContatos.length === 0 ? (
+					<View style={styles.emptyContainer}>
+						<MaterialCommunityIcons name="account-search" size={64} color={subtitleColor} />
+						<Text style={[styles.emptyTitle, { color: textColor }]}>Nenhum resultado</Text>
+						<Text style={[styles.emptySubtitle, { color: subtitleColor }]}>
+							Não encontramos contatos para "{searchQuery}"
+						</Text>
+					</View>
 				) : (
 					<FlatList
-						data={contatos}
+						data={filteredContatos}
 						keyExtractor={(item) => item.id}
 						renderItem={renderContact}
 						contentContainerStyle={styles.listContent}
@@ -252,7 +309,11 @@ export default function ContactListScreen({ navigation }: Props) {
 				)}
 
 				<TouchableOpacity
-					style={[styles.fab, isMobile && styles.fabMobile, { backgroundColor: fabBg, shadowColor: fabBg }]}
+					style={[
+						styles.fab,
+						isMobile && { bottom: 56 + insets.bottom + 20 },
+						{ backgroundColor: fabBg, shadowColor: fabBg }
+					]}
 					onPress={() => navigation.navigate('AddContact')}
 				>
 					<MaterialCommunityIcons name="plus" size={28} color={fabIconColor} />
@@ -291,6 +352,33 @@ const styles = StyleSheet.create({
 	},
 	logoutButton: {
 		padding: 8,
+	},
+	searchContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginHorizontal: 16,
+		marginTop: 16,
+		marginBottom: 4,
+		paddingHorizontal: 12,
+		paddingVertical: 10,
+		borderRadius: 12,
+		borderWidth: 1,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.05,
+		shadowRadius: 4,
+		elevation: 2,
+	},
+	searchIcon: {
+		marginRight: 8,
+	},
+	searchInput: {
+		flex: 1,
+		fontSize: 16,
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
+	},
+	clearSearchBtn: {
+		padding: 4,
 	},
 	loadingContainer: {
 		flex: 1,
@@ -381,7 +469,7 @@ const styles = StyleSheet.create({
 	},
 	fab: {
 		position: 'absolute',
-		bottom: 20,
+		bottom: 30,
 		right: 20,
 		width: 60,
 		height: 60,
@@ -394,8 +482,5 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.4,
 		shadowRadius: 8,
 		elevation: 6,
-	},
-	fabMobile: {
-		bottom: 60,
 	},
 });

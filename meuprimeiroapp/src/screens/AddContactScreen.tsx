@@ -25,7 +25,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 type AddContactScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'AddContact'>;
 
 type Props = {
-  navigation: AddContactScreenNavigationProp;
+	navigation: AddContactScreenNavigationProp;
 };
 
 export default function AddContactScreen({ navigation }: Props) {
@@ -62,7 +62,7 @@ export default function AddContactScreen({ navigation }: Props) {
 	const handleAddContact = async () => {
 		console.log('🔵 Botão Adicionar Contato clicado!');
 		console.log('Dados:', { nome, email, idade, telefone });
-		
+
 		// Validações
 		if (!nome || !email || !idade || !telefone) {
 			console.log('❌ Campos vazios detectados');
@@ -91,7 +91,7 @@ export default function AddContactScreen({ navigation }: Props) {
 
 		const user = auth.currentUser;
 		console.log('Usuário atual:', user ? user.uid : 'NÃO AUTENTICADO');
-		
+
 		if (!user) {
 			console.log('❌ Usuário não está logado');
 			Alert.alert('Erro', 'Você precisa estar logado para adicionar contatos');
@@ -111,12 +111,12 @@ export default function AddContactScreen({ navigation }: Props) {
 				usuarioId: user.uid,
 				criadoEm: serverTimestamp(),
 			};
-			
+
 			console.log('📤 Salvando contato no Firestore:', contatoData);
-			
+
 			// Salvar contato no Firestore
 			const docRef = await addDoc(collection(db, 'contatos'), contatoData);
-			
+
 			console.log('✅ Contato salvo com sucesso! ID:', docRef.id);
 
 			// Limpar formulário e garantir que loading seja desligado antes de navegar
@@ -158,13 +158,13 @@ export default function AddContactScreen({ navigation }: Props) {
 	};
 
 	return (
-		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }] }>
-			<KeyboardAvoidingView 
+		<ThemedView style={[styles.safeArea, { backgroundColor: Colors[theme].background }]}>
+			<KeyboardAvoidingView
 				style={[styles.container, { backgroundColor: Colors[theme].background }]}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
-				<ScrollView 
+				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
 				>
@@ -248,7 +248,7 @@ export default function AddContactScreen({ navigation }: Props) {
 							onRequestClose={() => setErrorModalVisible(false)}
 						>
 							<View style={modalStyles.overlay}>
-								<View style={[modalStyles.modal, { backgroundColor: modalBg }] }>
+								<View style={[modalStyles.modal, { backgroundColor: modalBg }]}>
 									<Text style={[modalStyles.modalTitle, { color: textColor }]}>{errorTitle}</Text>
 									<Text style={[modalStyles.modalMessage, { color: subtitleColor }]}>{errorMessageDetails}</Text>
 									<Pressable
@@ -330,6 +330,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 		color: '#1F2937',
 		fontWeight: '500',
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	button: {
 		backgroundColor: '#6366F1',

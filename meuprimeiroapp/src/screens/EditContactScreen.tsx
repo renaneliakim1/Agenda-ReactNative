@@ -260,6 +260,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 		color: '#1F2937',
 		fontWeight: '500',
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	button: {
 		backgroundColor: '#6366F1',

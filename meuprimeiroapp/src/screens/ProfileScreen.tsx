@@ -422,6 +422,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 16,
     borderWidth: 1,
+    ...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
   },
   saveButton: {
     width: '100%',

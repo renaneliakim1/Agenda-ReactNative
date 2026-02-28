@@ -309,6 +309,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F8FAFC',
 		color: '#22223B',
 		fontWeight: '500',
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	button: {
 		backgroundColor: '#2563EB',

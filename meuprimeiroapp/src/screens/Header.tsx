@@ -5,10 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
-  SafeAreaView,
   Alert,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
@@ -21,18 +21,25 @@ const Header: React.FC = () => {
   const isMobile = width < BREAKPOINT;
   const navigation = useNavigation<any>();
   const { theme, toggleTheme } = useTheme();
+  const insets = useSafeAreaInsets();
+
   const backgroundColor = Colors[theme].background;
   const borderColor = Colors[theme].icon;
   const iconColor = Colors[theme].text;
   const textColor = Colors[theme].text;
+  type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+
   // menu base
-  const itemsBase = [
+  const itemsBase: { key: string; label: string; icon: IconName }[] = [
     { key: 'home', label: 'Contatos', icon: 'account-group' },
     { key: 'profile', label: 'Minha conta', icon: 'account' },
   ];
 
   // incluir logout em todas as plataformas e mostrar ícones também no desktop
-  const items = [...itemsBase, { key: 'logout', label: 'Sair', icon: 'logout' }];
+  const items: { key: string; label: string; icon: IconName }[] = [
+    ...itemsBase,
+    { key: 'logout', label: 'Sair', icon: 'logout' }
+  ];
 
   const handleItemPress = (key: string) => {
     if (key === 'profile') return navigation.navigate('Profile');
@@ -66,11 +73,17 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <SafeAreaView
+      <View
         style={[
           styles.container,
           isMobile ? styles.bottom : styles.top,
-          { backgroundColor, borderBottomColor: borderColor, borderTopColor: borderColor },
+          {
+            backgroundColor,
+            borderBottomColor: borderColor,
+            borderTopColor: borderColor,
+            paddingBottom: isMobile ? insets.bottom : 0,
+            paddingTop: !isMobile ? insets.top : 0
+          },
         ]}
       >
         <View style={[styles.menu, isMobile ? styles.menuMobile : styles.menuDesktop]}>
@@ -107,7 +120,7 @@ const Header: React.FC = () => {
             />
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
 
       {/* no modal - header apenas navega para Profile */}
     </>

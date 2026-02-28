@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
- 	View,
- 	Text,
- 	TextInput,
- 	StyleSheet,
- 	TouchableOpacity,
- 	Alert,
- 	ActivityIndicator,
- 	SafeAreaView,
- 	ScrollView,
- 	KeyboardAvoidingView,
- 	Platform,
- 	BackHandler,
+	View,
+	Text,
+	TextInput,
+	StyleSheet,
+	TouchableOpacity,
+	Alert,
+	ActivityIndicator,
+	SafeAreaView,
+	ScrollView,
+	KeyboardAvoidingView,
+	Platform,
+	BackHandler,
 } from 'react-native';
 import { ThemedView } from '../../components/themed-view';
 import { useTheme } from '../context/ThemeContext';
@@ -107,19 +107,19 @@ export default function LoginScreen({ navigation }: any) {
 			console.log('🔐 Tentando fazer login...');
 			const userCredential = await signInWithEmailAndPassword(auth, email.trim(), senha);
 			const user = userCredential.user;
-			
+
 			console.log('✅ Login bem-sucedido:', user.email);
 			console.log('🔄 Aguardando redirecionamento automático...');
-			
+
 			// A navegação será tratada automaticamente pelo onAuthStateChanged no AppNavigator
 			// Não é necessário navegar manualmente
 		} catch (error: any) {
 			console.error('❌ Erro no login:', error);
 			console.error('Código do erro:', error?.code);
-			
+
 			let titulo = 'Erro no Login';
 			let mensagem = 'Não foi possível realizar o login. Tente novamente.';
-			
+
 			if (error && error.code) {
 				switch (error.code) {
 					case 'auth/invalid-email':
@@ -149,8 +149,8 @@ export default function LoginScreen({ navigation }: any) {
 						mensagem = 'Você fez muitas tentativas de login.\n\nPor segurança, aguarde alguns minutos antes de tentar novamente.';
 						break;
 					case 'auth/network-request-failed':
-						titulo = 'Erro de Conexão';
-						mensagem = 'Não foi possível conectar ao servidor.\n\nVerifique sua conexão com a internet.';
+						titulo = 'Erro de Conexão ou Timeout';
+						mensagem = 'Não foi possível conectar ao Firebase Auth.\n\nIsso geralmente acontece quando a internet do celular bloqueia Websockets ou a conexão está instável no Expo Go. Tente reconectar o Wi-Fi ou usar os dados móveis.';
 						break;
 					case 'auth/timeout':
 						titulo = 'Tempo Esgotado';
@@ -159,6 +159,11 @@ export default function LoginScreen({ navigation }: any) {
 					default:
 						titulo = 'Erro Inesperado';
 						mensagem = error.message || 'Ocorreu um erro desconhecido. Tente novamente mais tarde.';
+				}
+			} else {
+				if (error?.message?.includes('network-request-failed')) {
+					titulo = 'Erro de Conexão ou Timeout';
+					mensagem = 'Não foi possível conectar ao Firebase Auth.\n\nIsso geralmente acontece quando a internet do celular bloqueia conexões do Expo Go. Tente reconectar o Wi-Fi ou usar os dados móveis.';
 				}
 			}
 
@@ -170,60 +175,60 @@ export default function LoginScreen({ navigation }: any) {
 
 	return (
 		<ThemedView style={styles.safeArea}>
-			<KeyboardAvoidingView 
+			<KeyboardAvoidingView
 				style={styles.container}
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 				keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
 			>
-				<ScrollView 
+				<ScrollView
 					showsVerticalScrollIndicator={false}
 					contentContainerStyle={styles.scrollContent}
 				>
 					<View style={styles.headerContainer}>
-							<MaterialCommunityIcons name="lock" size={56} color={Colors[theme].text} />
-							<Text style={[styles.title, { color: textColor }]}>Login</Text>
-							<Text style={[styles.subtitle, { color: subtitleColor }]}>Acesse sua conta</Text>
-							<TouchableOpacity
-								style={[styles.themeButton, { borderColor: subtitleColor, backgroundColor: Colors[theme].background }]}
-								onPress={toggleTheme}
-								hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-							>
-								<MaterialCommunityIcons
-									name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
-									size={20}
-									color={Colors[theme].text}
-								/>
-							</TouchableOpacity>
-						</View>
-				<View style={styles.infoContainer}>
-					<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }]}>
-						<MaterialCommunityIcons name="contacts" size={32} color={Colors[theme].text} style={styles.infoIcon} />
-						<Text style={[styles.infoTitle, { color: textColor }]}>Sistema de Gerenciamento de Contatos</Text>
-						<Text style={[styles.infoDescription, { color: subtitleColor }] }>
-							Organize e gerencie seus contatos pessoais de forma simples e segura. 
-							Adicione, edite e pesquise contatos com informações como nome, email, 
-							telefone e idade. Todos os seus dados são armazenados de forma 
-							segura na nuvem e sincronizados em tempo real.
-						</Text>
+						<MaterialCommunityIcons name="lock" size={56} color={Colors[theme].text} />
+						<Text style={[styles.title, { color: textColor }]}>Login</Text>
+						<Text style={[styles.subtitle, { color: subtitleColor }]}>Acesse sua conta</Text>
+						<TouchableOpacity
+							style={[styles.themeButton, { borderColor: subtitleColor, backgroundColor: Colors[theme].background }]}
+							onPress={toggleTheme}
+							hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+						>
+							<MaterialCommunityIcons
+								name={theme === 'light' ? 'weather-night' : 'white-balance-sunny'}
+								size={20}
+								color={Colors[theme].text}
+							/>
+						</TouchableOpacity>
 					</View>
-				</View>
+					<View style={styles.infoContainer}>
+						<View style={[styles.infoCard, { backgroundColor: infoCardBg, borderColor: infoCardBorder }]}>
+							<MaterialCommunityIcons name="contacts" size={32} color={Colors[theme].text} style={styles.infoIcon} />
+							<Text style={[styles.infoTitle, { color: textColor }]}>Sistema de Gerenciamento de Contatos</Text>
+							<Text style={[styles.infoDescription, { color: subtitleColor }]}>
+								Organize e gerencie seus contatos pessoais de forma simples e segura.
+								Adicione, edite e pesquise contatos com informações como nome, email,
+								telefone e idade. Todos os seus dados são armazenados de forma
+								segura na nuvem e sincronizados em tempo real.
+							</Text>
+						</View>
+					</View>
 					<View style={styles.formContainer}>
 						<View style={styles.inputGroup}>
-								<Text style={[styles.label, { color: textColor }]}>Email</Text>
-								<TextInput
-									style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
-									placeholder="seu_email@email.com"
-									placeholderTextColor={subtitleColor}
-									keyboardType="email-address"
-									autoCapitalize="none"
-									value={email}
-									onChangeText={setEmail}
-								/>
-							</View>
+							<Text style={[styles.label, { color: textColor }]}>Email</Text>
+							<TextInput
+								style={[styles.input, { backgroundColor: inputBg, color: textColor, borderColor: inputBorderColor }]}
+								placeholder="seu_email@email.com"
+								placeholderTextColor={subtitleColor}
+								keyboardType="email-address"
+								autoCapitalize="none"
+								value={email}
+								onChangeText={setEmail}
+							/>
+						</View>
 
 						<View style={styles.inputGroup}>
 							<Text style={[styles.label, { color: textColor }]}>Senha</Text>
-							<View style={[styles.passwordContainer, { backgroundColor: inputBg, borderColor: inputBorderColor }] }>
+							<View style={[styles.passwordContainer, { backgroundColor: inputBg, borderColor: inputBorderColor }]}>
 								<TextInput
 									style={[styles.passwordInput, { color: textColor }]}
 									placeholder="••••••••"
@@ -259,7 +264,7 @@ export default function LoginScreen({ navigation }: any) {
 					</View>
 
 					<View style={styles.footer}>
-						<TouchableOpacity 
+						<TouchableOpacity
 							style={styles.forgotPasswordContainer}
 							onPress={() => navigation.navigate('ForgotPassword')}
 						>
@@ -369,6 +374,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F8FAFC', // cinza muito claro
 		color: '#22223B',
 		fontWeight: '500',
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	passwordContainer: {
 		flexDirection: 'row',
@@ -387,6 +393,7 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		color: '#22223B',
 		fontWeight: '500',
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	eyeButton: {
 		position: 'absolute',

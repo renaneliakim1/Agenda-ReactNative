@@ -393,6 +393,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#F8FAFC',
 		color: '#22223B',
 		fontWeight: '500',
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	button: {
 		backgroundColor: '#2563EB',
@@ -441,14 +442,14 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		borderWidth: 1.2,
 		borderRadius: 4,
-		paddingHorizontal: 14,
-		paddingVertical: 12,
-		marginBottom: 8,
+		paddingLeft: 14,
+		paddingRight: 8,
 	},
 	inputInline: {
 		flex: 1,
 		fontSize: 16,
-		paddingVertical: 0,
+		paddingVertical: 12,
+		...(Platform.OS === 'web' && { outlineStyle: 'none' as any }),
 	},
 	eyeButton: {
 		padding: 6,

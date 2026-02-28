@@ -1,9 +1,14 @@
+import { Platform } from 'react-native';
+if (Platform.OS !== 'web') {
+  require('cross-fetch/polyfill');
+}
 import React from 'react';
 import { LogBox } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { app, db, auth } from './src/config/firebaseConfig';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { ThemeProvider } from './src/context/ThemeContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 console.log('Firebase connectado:', app.name);
 console.log('Firestore instância:', db ? 'Disponível' : 'Indisponível');
@@ -39,10 +44,12 @@ if (typeof window !== 'undefined') {
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <AppNavigator />
-      </ThemeProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <AppNavigator />
+        </ThemeProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
